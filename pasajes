@@ -1,0 +1,4713 @@
+document.addEventListener("DOMContentLoaded", function () {
+	
+	// 🔹 Comprobar si estamos en una página de conductores
+    function isPaginaConductores() {
+        const currentUrl = window.location.href;
+        const paginasConductores = [
+			'/iniciar-sesion/',
+            '/zutko-conductores/',
+            '/editar-perfil-zutko-conductores/',
+			'/configuracion-zutko-conductores/',
+			'/mis-viajes-zutko-conductores/',
+			'/mis-pagos-zutko-conductores/',
+			'/login-admin-zutko/',
+			'/zutko-admin/',
+			'/editar-perfil-admin-zutko/',
+			'/perfiles-usuarios-admin-zutko/',
+			'/registro-conductores-admin-zutko/',
+			'/manejo-solicitudes-admin-zutko/',
+			'/olvido-de-contrasena-zutko-pasajeros/',
+			'/olvido-de-contrasena-zutko-conductores/',
+			'/ranking-historico-zutko-conductores/',
+			'/crear-contrasena-zutko-conductores/',
+			'/mi-tienda-zutko-conductores/',
+			'/registro-zutko-conductores/'
+        ];
+
+        return paginasConductores.some(page => currentUrl.includes(page));
+    }
+
+    // Si estamos en una página de conductores, no ejecutar el código de pasajeros
+    if (isPaginaConductores()) {
+        return; // Detener ejecución del código de pasajeros
+    }
+	
+	function mostrarAlertaGlobal(mensaje, opciones = {}) {
+  const modal = document.getElementById("modal-global-alerta");
+  const mensajeElemento = document.getElementById("mensaje-global");
+  const botones = document.getElementById("botones-globales");
+
+  mensajeElemento.textContent = mensaje;
+
+  // Limpiar botones anteriores
+  botones.innerHTML = "";
+
+  // Si se pasan botones personalizados
+  if (opciones.botones) {
+    opciones.botones.forEach(({ texto, callback }) => {
+      const btn = document.createElement("button");
+      btn.textContent = texto;
+      btn.onclick = () => {
+        modal.style.display = "none";
+        if (callback) callback();
+      };
+      botones.appendChild(btn);
+    });
+  } else {
+    // Botón por defecto: solo cerrar
+    const btn = document.createElement("button");
+    btn.textContent = "Aceptar";
+    btn.onclick = () => modal.style.display = "none";
+    botones.appendChild(btn);
+  }
+
+  modal.style.display = "flex";
+}
+	function mostrarAlertaGlobalAsync(mensaje) {
+  return new Promise(resolve => {
+    const modal = document.getElementById("modal-global-alerta");
+    const mensajeElemento = document.getElementById("mensaje-global");
+    const botones = document.getElementById("botones-globales");
+
+    mensajeElemento.textContent = mensaje;
+    botones.innerHTML = "";
+
+    const btn = document.createElement("button");
+    btn.textContent = "Aceptar";
+    btn.onclick = () => {
+      modal.style.display = "none";
+      resolve(); // ✅ Espera aquí hasta que el usuario haga clic
+    };
+    botones.appendChild(btn);
+
+    modal.style.display = "flex";
+  });
+}
+
+	function mostrarConfirmacionGlobal(mensajeHTML, callbackConfirmar, callbackCancelar) {
+  const modal = document.getElementById("modal-global-alerta");
+  const mensajeElemento = document.getElementById("mensaje-global");
+  const botones = document.getElementById("botones-globales");
+
+  // Mensaje con HTML personalizado
+  mensajeElemento.innerHTML = mensajeHTML;
+
+  // Limpiar botones anteriores
+  botones.innerHTML = "";
+
+  // Botón Confirmar
+  const btnConfirmar = document.createElement("button");
+  btnConfirmar.textContent = "Sí, contactar";
+  btnConfirmar.style.backgroundColor = "#28a745"; // verde
+  btnConfirmar.onclick = () => {
+    modal.style.display = "none";
+    if (callbackConfirmar) callbackConfirmar();
+  };
+
+  // Botón Cancelar
+  const btnCancelar = document.createElement("button");
+  btnCancelar.textContent = "Volver al login";
+  btnCancelar.style.backgroundColor = "#dc3545"; // rojo
+  btnCancelar.style.marginLeft = "10px";
+  btnCancelar.onclick = () => {
+    modal.style.display = "none";
+    if (callbackCancelar) callbackCancelar();
+  };
+
+  botones.appendChild(btnConfirmar);
+  botones.appendChild(btnCancelar);
+
+  modal.style.display = "flex";
+}
+function mostrarConfirmacionAsync(mensajeHTML) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("modal-global-alerta");
+    const mensajeElemento = document.getElementById("mensaje-global");
+    const botones = document.getElementById("botones-globales");
+
+    mensajeElemento.innerHTML = mensajeHTML;
+    botones.innerHTML = "";
+
+    const btnSi = document.createElement("button");
+    btnSi.textContent = "Sí, cancelar";
+    btnSi.style.backgroundColor = "#dc3545";
+    btnSi.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    const btnNo = document.createElement("button");
+    btnNo.textContent = "No";
+    btnNo.style.backgroundColor = "#6c757d";
+    btnNo.style.marginLeft = "10px";
+    btnNo.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+
+    botones.appendChild(btnSi);
+    botones.appendChild(btnNo);
+
+    modal.style.display = "flex";
+  });
+}
+	
+	function mostrarConfirmacionAsyncPersonalizada(mensajeHTML, textoConfirmar, textoCancelar) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("modal-global-alerta");
+    const mensajeElemento = document.getElementById("mensaje-global");
+    const botones = document.getElementById("botones-globales");
+
+    mensajeElemento.innerHTML = mensajeHTML;
+    botones.innerHTML = "";
+
+    const btnSi = document.createElement("button");
+    btnSi.textContent = textoConfirmar || "Sí";
+    btnSi.style.backgroundColor = "#28a745";
+    btnSi.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    const btnNo = document.createElement("button");
+    btnNo.textContent = textoCancelar || "Cancelar";
+    btnNo.style.backgroundColor = "#6c757d";
+    btnNo.style.marginLeft = "10px";
+    btnNo.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+
+    botones.appendChild(btnSi);
+    botones.appendChild(btnNo);
+
+    modal.style.display = "flex";
+  });
+}
+
+// Cerrar modal de carga si el usuario vuelve con "atrás"
+window.addEventListener("pageshow", function (event) {
+    const entries = performance.getEntriesByType("navigation");
+    const tipo = entries.length > 0 ? entries[0].type : null;
+
+    if (event.persisted || tipo === "back_forward") {
+        document.getElementById("modal-cargando").style.display = "none";
+    }
+});
+
+function mostrarModalCarga() {
+    const modal = document.getElementById("modal-cargando");
+    if (modal) modal.style.display = "flex";
+}
+
+function ocultarModalCarga() {
+    const modal = document.getElementById("modal-cargando");
+    if (modal) modal.style.display = "none";
+}
+
+  // El formulario se enviará de forma tradicional
+const formularioRegistro = document.querySelector(".register-form");
+if (formularioRegistro) {
+let terminosAceptados = false;
+	let verificado = false;
+let codigoTemporal = ""; // Guardamos aquí el código recibido desde el backend
+    formularioRegistro.addEventListener("submit", async function (e) {
+        // Limpiar errores anteriores
+        document.querySelectorAll(".input-error").forEach(el => el.remove());
+
+        let valid = true;
+
+        const telefono = formularioRegistro.querySelector("input[name='telefono']").value.trim();
+        const password = formularioRegistro.querySelector("input[name='password']").value.trim();
+
+        // Validar teléfono
+        const telefonoRegex = /^3\d{9}$/;
+        if (!telefonoRegex.test(telefono)) {
+            mostrarError(formularioRegistro.querySelector("input[name='telefono']"), "📱 El teléfono debe tener 10 dígitos y empezar con 3");
+            valid = false;
+        }
+
+        // Validar contraseña
+        const contraseñaRegex = /^(?=.*[A-Z])(?=.*\d).{7,}$/;
+        if (!contraseñaRegex.test(password)) {
+            mostrarError(formularioRegistro.querySelector("input[name='password']"), "🔒 Mínimo 7 caracteres, con al menos 1 mayúscula y 1 número");
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+			return;
+        }
+		
+// dentro del submit
+if (!verificado) {
+    e.preventDefault();
+
+    const correo = formularioRegistro.querySelector("input[name='email']").value.trim();
+    const resultado = await verificarExistenciaUsuario(telefono, correo);
+
+    if (resultado.error === "telefono") {
+        mostrarError(formularioRegistro.querySelector("input[name='telefono']"), "📱 Este número ya está registrado.");
+        return;
+    }
+
+    if (resultado.error === "email") {
+        mostrarError(formularioRegistro.querySelector("input[name='email']"), "📧 Este correo ya está registrado.");
+        return;
+    }
+
+    if (resultado.error === "error") {
+        mostrarAlertaGlobal("❌ Error verificando existencia. Intenta de nuevo.");
+        return;
+    }
+
+    // ✅ Solo mostrar términos si aún no los aceptó
+    if (!terminosAceptados) {
+        document.getElementById("terminos-modal").style.display = "flex";
+        return;
+    }
+
+    // ✅ Si ya los aceptó, enviamos código
+    await iniciarVerificacion(telefono);
+    return;
+}
+        });
+
+    function mostrarError(input, mensaje) {
+        const error = document.createElement("div");
+        error.classList.add("input-error");
+        error.style.color = "red";
+        error.style.marginTop = "4px";
+        error.textContent = mensaje;
+        input.parentElement.appendChild(error);
+    }
+	async function verificarExistenciaUsuario(telefono, correo) {
+    const formData = new FormData();
+    formData.append("action", "verificar_existencia_usuario");
+    formData.append("telefono", telefono);
+    formData.append("email", correo);
+
+    try {
+        const res = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+        return data; // { success: true } o { error: "telefono" } o { error: "correo" }
+    } catch (err) {
+        return { error: "error" };
+    }
+}
+	async function iniciarVerificacion(telefono) {
+    document.getElementById("modal-verificacion").style.display = "flex";
+    document.getElementById("numero-enviado").textContent = `+57 ${telefono}`;
+		document.querySelectorAll(".codigo-digit").forEach(input => input.value = "");
+    iniciarTemporizador();
+
+    // Enviar petición al backend para generar código y mandarlo por WhatsApp
+    const formData = new FormData();
+    formData.append("action", "enviar_codigo_whatsapp");
+    formData.append("telefono", telefono);
+
+    try {
+		mostrarModalCarga();
+        const res = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+					ocultarModalCarga();
+        if (data.success) {
+            // Si quieres, puedes guardar algo en localStorage
+        } else {
+            mostrarAlertaGlobal("❌ No se pudo enviar el código. Intenta más tarde.");
+			ocultarModalCarga();
+        }
+    } catch (err) {
+		ocultarModalCarga();
+    }
+}
+document.getElementById("verificar-codigo").addEventListener("click", async () => {
+  const codigo = Array.from(document.querySelectorAll(".codigo-digit"))
+    .map(input => input.value).join("");
+
+  if (codigo.length !== 4) {
+    mostrarAlertaGlobal("🔒 El código debe tener 4 dígitos");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("action", "verificar_codigo_whatsapp");
+  formData.append("codigo", codigo);
+
+  try {
+    mostrarModalCarga();
+    const res = await fetch("/wp-admin/admin-ajax.php", { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.success) {
+      verificado = true;
+      document.getElementById("modal-verificacion").style.display = "none";
+
+      // Enviar correo
+      const correo = formularioRegistro.querySelector("input[name='email']").value.trim();
+      const nombre = formularioRegistro.querySelector("input[name='nombre']").value.trim();
+      const telefono = formularioRegistro.querySelector("input[name='telefono']").value.trim();
+
+      const formData = new FormData();
+      formData.append("action", "enviar_correo_bienvenida");
+      formData.append("correo", correo);
+      formData.append("nombre", nombre);
+      formData.append("telefono", telefono);
+
+      fetch("/wp-admin/admin-ajax.php", { method: "POST", body: formData })
+        .then(res => res.json())
+        .then(res => {
+		  formularioRegistro.querySelector("[type='submit']").click();
+        })
+        .catch(err => {
+		  formularioRegistro.querySelector("[type='submit']").click();
+        });
+    } else {
+      mostrarAlertaGlobal("❌ Código incorrecto. Intenta de nuevo.");
+      ocultarModalCarga();
+    }
+  } catch (err) {
+    ocultarModalCarga();
+  }
+});
+let tiempoRestante = 180;
+let intervalo;
+
+function iniciarTemporizador() {
+    tiempoRestante = 180;
+    document.getElementById("contador").textContent = tiempoRestante;
+    document.getElementById("reenviar-codigo").disabled = true;
+
+    intervalo = setInterval(() => {
+        tiempoRestante--;
+        document.getElementById("contador").textContent = tiempoRestante;
+        if (tiempoRestante <= 0) {
+            clearInterval(intervalo);
+            document.getElementById("reenviar-codigo").disabled = false;
+        }
+    }, 1000);
+}
+
+document.getElementById("reenviar-codigo").addEventListener("click", () => {
+    const telefono = formularioRegistro.querySelector("input[name='telefono']").value.trim();
+    iniciarVerificacion(telefono);
+});
+document.getElementById("cambiar-numero").addEventListener("click", () => {
+    document.getElementById("modal-verificacion").style.display = "none";
+});
+
+	    // Botones del modal
+        document.getElementById("aceptar-terminos-btn").addEventListener("click", function () {
+            terminosAceptados = true;
+            document.getElementById("terminos-modal").style.display = "none";
+            const telefono = formularioRegistro.querySelector("input[name='telefono']").value.trim();
+    iniciarVerificacion(telefono);
+        });
+
+        document.getElementById("cancelar-terminos-btn").addEventListener("click", function () {
+            terminosAceptados = false;
+            document.getElementById("terminos-modal").style.display = "none";
+            // No se hace submit
+        });
+    }
+	
+(function(){
+  const inputs = Array.from(document.querySelectorAll(".codigo-digit"));
+  if (!inputs.length) return;
+
+  // Limpia y enfoca el primero al abrir el modal
+  window.resetCodigoInputs = function(){
+    inputs.forEach(i => i.value = "");
+    if (inputs[0]) inputs[0].focus();
+  };
+
+  // Aceptar solo dígitos y avanzar automático
+  inputs.forEach((inp, idx) => {
+    inp.setAttribute("inputmode", "numeric");
+    inp.setAttribute("autocomplete", "one-time-code"); // hint para móviles
+
+    inp.addEventListener("input", function(e){
+      // Mantener solo un dígito numérico
+      this.value = this.value.replace(/\D/g, "").slice(0,1);
+      if (this.value && idx < inputs.length - 1) {
+        inputs[idx + 1].focus();
+        inputs[idx + 1].select();
+      }
+    });
+
+    // Navegación: Backspace retrocede, flechas izquierda/derecha
+    inp.addEventListener("keydown", function(e){
+      if (e.key === "Backspace" && !this.value && idx > 0) {
+        inputs[idx - 1].focus();
+        inputs[idx - 1].value = "";
+      }
+      if (e.key === "ArrowLeft" && idx > 0) {
+        inputs[idx - 1].focus();
+        inputs[idx - 1].select();
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight" && idx < inputs.length - 1) {
+        inputs[idx + 1].focus();
+        inputs[idx + 1].select();
+        e.preventDefault();
+      }
+    });
+  });
+
+  // Pegar los 4 dígitos en cualquiera de los inputs
+  const contenedor = inputs[0].parentElement || document;
+  contenedor.addEventListener("paste", function(e){
+    const pasted = (e.clipboardData || window.clipboardData).getData("text") || "";
+    const nums = pasted.replace(/\D/g, "").slice(0, inputs.length);
+    if (!nums) return;
+    e.preventDefault();
+    inputs.forEach((inp, i) => { inp.value = nums[i] || ""; });
+    // Si se llenó todo, enfoca el botón "Verificar"
+    const allFilled = inputs.every(i => i.value.length === 1);
+    if (allFilled) {
+      const btn = document.getElementById("verificar-codigo");
+      if (btn) btn.focus();
+    } else {
+      // Si no, enfoca el primero vacío
+      const next = inputs.find(i => !i.value);
+      if (next) next.focus();
+    }
+  });
+
+  // Si abres el modal de verificación, resetea y enfoca
+  const modal = document.getElementById("modal-verificacion");
+  if (modal) {
+    const obs = new MutationObserver(() => {
+      if (getComputedStyle(modal).display !== "none") resetCodigoInputs();
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ["style", "class"] });
+  }
+})();
+	
+window.mostrarExitoZutkoYSubmit = function(){
+  var modal = document.getElementById("zutko-success");
+  if (!modal) { formularioRegistro.submit(); return; }
+
+  modal.classList.remove("is-hidden");
+
+  var secs = 4;
+  var c  = document.getElementById("zs-count");
+  var btn = document.getElementById("zs-cta");
+  if (c) c.textContent = secs;
+
+  var timer = setInterval(function(){
+    secs--;
+    if (c) c.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(timer);
+      // Si quieres redirigir a login en vez de re-postear:
+      window.location.href = "/inicia-sesion-zutko-pasajeros/";
+    }
+  }, 1000);
+
+  if (btn) {
+    btn.addEventListener("click", function(){
+      clearInterval(timer);
+      window.location.href = "/inicia-sesion-zutko-pasajeros/";
+    }, { once: true });
+  }
+};
+	
+	function isPaginaCargarInicioUsu() {
+    return window.location.href.includes('/inicio-usuarios-zutko/');
+}
+
+if (isPaginaCargarInicioUsu()) {
+        var btnPasajero = document.getElementById('btn-soy-pasaj');
+        var btnConductor = document.getElementById('btn-soy-condu');
+
+        if (btnPasajero) {
+            btnPasajero.addEventListener('click', function () {
+                mostrarModalCarga();
+            });
+        }
+
+        if (btnConductor) {
+            btnConductor.addEventListener('click', function () {
+                mostrarModalCarga();
+            });
+        }
+}
+
+	
+    		function isPaginaCargarInicioPasajer() {
+    return window.location.href.includes("/inicia-sesion-zutko-pasajeros/");
+}
+	if (isPaginaCargarInicioPasajer()) {
+mostrarModalCarga();
+    fetch('/wp-admin/admin-ajax.php?action=verificar_sesion_pasajero')
+      .then(response => response.json())
+      .then(data => {
+
+        if (data.success) {
+          window.location.href = "/zutko-pasajeros/";
+        } else {
+			ocultarModalCarga();
+        }
+      })
+      .catch(error => {
+		ocultarModalCarga();
+      });
+  }
+    		function isPaginaCargarInicioPasaj() {
+    return window.location.href.includes("/inicia-sesion-zutko-pasajeros/");
+}
+	if (isPaginaCargarInicioPasaj()) {
+
+const formularioLogin = document.querySelector(".login-form");
+if (formularioLogin) {
+
+    const telefonoInput = formularioLogin.querySelector("input[name='telefono']");
+    const passwordInput = formularioLogin.querySelector("input[name='password']");
+
+    const crearMensajeError = (elemento, mensaje) => {
+        let error = elemento.parentElement.querySelector(".error-msg");
+        if (!error) {
+            error = document.createElement("div");
+            error.className = "error-msg";
+            error.style.color = "red";
+            error.style.fontSize = "13px";
+            error.style.marginTop = "5px";
+            elemento.parentElement.appendChild(error);
+        }
+        error.textContent = mensaje;
+    };
+
+    const limpiarErrores = () => {
+        formularioLogin.querySelectorAll(".error-msg").forEach(e => e.remove());
+    };
+
+    formularioLogin.addEventListener("submit", async function (e) {
+        limpiarErrores();
+
+        const telefono = telefonoInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        // Validación local del número
+        const regexTelefono = /^3\d{9}$/;
+        if (!regexTelefono.test(telefono)) {
+            e.preventDefault();
+            crearMensajeError(telefonoInput, "El número debe tener 10 dígitos y empezar por 3");
+            return;
+        }
+
+        if (password.length === 0) {
+            e.preventDefault();
+            crearMensajeError(passwordInput, "La contraseña es obligatoria");
+            return;
+        }
+
+        // Enviar al backend para validar si el número existe y si la contraseña coincide
+        e.preventDefault(); // Detenemos el envío hasta confirmar
+        try {
+			mostrarModalCarga();
+            const response = await fetch("/wp-admin/admin-ajax.php?action=validar_login_pasajero", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: "telefono=" + encodeURIComponent(telefono) + "&password=" + encodeURIComponent(password)
+});
+
+            const data = await response.json();
+            if (data.success) {
+				
+				const verificarEstado = await fetch("/wp-admin/admin-ajax.php?action=verificar_estado_pasajero", {
+    credentials: 'same-origin'
+});
+
+const estado = await verificarEstado.json();
+
+if (estado.success && estado.data?.bloqueado) {
+    var mensajeHTML = "<div style='font-size:15px; text-align:left;'>" + estado.data.mensaje + "</div>" +
+                      "<p style='margin-top:10px;'>¿Deseas contactar con soporte por WhatsApp?</p>";
+
+    mostrarConfirmacionGlobal(
+        mensajeHTML,
+        async function () {
+            // Confirmado
+            await fetch('/wp-admin/admin-ajax.php?action=cerrar_sesion', { method: 'POST' });
+            window.location.href = "https://wa.me/573207887257";
+			ocultarModalCarga();
+        },
+        async function () {
+            // Cancelado
+            await fetch('/wp-admin/admin-ajax.php?action=cerrar_sesion', { method: 'POST' });
+            window.location.href = "/inicia-sesion-zutko-pasajeros/";
+        }
+    );
+    return;
+}
+                window.location.href = "/zutko-pasajeros/"; // Cambia a donde rediriges si es necesario
+            } else {
+                if (data.error === "telefono") {
+					ocultarModalCarga();
+                    crearMensajeError(telefonoInput, "El número no está registrado");
+                } else if (data.error === "password") {
+					ocultarModalCarga();
+                    crearMensajeError(passwordInput, "La contraseña es incorrecta");
+                } else {
+                    mostrarAlertaGlobal("❌ Ocurrió un error inesperado.");
+								ocultarModalCarga();
+                }
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ No se pudo conectar al servidor.");
+					ocultarModalCarga();
+        }
+    });
+}
+	
+// 🔹 INICIO DE SESIÓN CON CÓDIGO QR PARA PASAJERO
+const qrButton = document.querySelector(".alt-login button");
+const qrContainer = document.getElementById("qr-reader"); // Ya existe en HTML
+qrContainer.style.display = "none"; // Oculto al inicio
+
+let html5QrCode = null;
+let closeButton = null; // 🔥 botón global
+
+// 🔹 Configurar escaneo QR
+qrButton.addEventListener("click", () => {
+    qrContainer.style.display = "block";
+
+    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        qrCodeMessage => {
+
+            try {
+                const [telefono, password] = qrCodeMessage.split("|");
+
+                if (telefono && password) {
+                    document.querySelector("input[name='telefono']").value = telefono;
+                    document.querySelector("input[name='password']").value = password;
+
+                    html5QrCode.stop().then(() => {
+                        qrContainer.style.display = "none";
+                        if (closeButton) closeButton.remove();
+
+                        document.querySelector(".login-form").dispatchEvent(new Event("submit"));
+                    }).catch(err => console.error("Error al detener la cámara:", err));
+                } else {
+                    mostrarAlertaGlobal("❌ QR inválido. Formato esperado: TELEFONO|CONTRASEÑA");
+                }
+            } catch (error) {
+                mostrarAlertaGlobal("❌ Error en el formato del QR.");
+            }
+        },
+        errorMessage => {
+            // Puedes ignorar los errores menores
+        }
+    ).then(() => {
+        // 🔹 Crear botón "X" SOLO después de que la cámara ya está activa
+        if (!closeButton) {
+            closeButton = document.createElement("button");
+            closeButton.textContent = "✖";
+            closeButton.style.position = "absolute";
+            closeButton.style.top = "5px";
+            closeButton.style.right = "5px";
+            closeButton.style.background = "transparent";
+            closeButton.style.border = "none";
+            closeButton.style.fontSize = "22px";
+            closeButton.style.cursor = "pointer";
+            closeButton.style.color = "#FF0000";
+            closeButton.style.zIndex = "9999";
+            qrContainer.style.position = "relative";
+            qrContainer.appendChild(closeButton);
+
+            closeButton.addEventListener("click", () => {
+                qrContainer.style.display = "none";
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        if (closeButton) {
+                            closeButton.remove();
+                            closeButton = null;
+                        }
+                    }).catch(err => console.error("❌ Error al detener la cámara:", err));
+                }
+            });
+        }
+    });
+});
+		   // 🔥 FUNCIONALIDAD NUEVA: LEER QR DESDE UNA IMAGEN
+  const inputImagen = document.getElementById("upload-qr");
+
+    inputImagen.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const qrCodeScanner = new Html5Qrcode("qr-reader");
+        try {
+            const qrCodeMessage = await qrCodeScanner.scanFile(file, true);
+            procesarDatosQR(qrCodeMessage);
+        } catch (error) {
+            mostrarAlertaGlobal("❌ No se pudo leer el código QR. Intenta otra imagen.");
+        }
+    });
+
+    function procesarDatosQR(qrCodeMessage) {
+        try {
+            const [telefono, password] = qrCodeMessage.split("|");
+            if (telefono && password) {
+                document.querySelector("input[name='telefono']").value = telefono;
+                document.querySelector("input[name='password']").value = password;
+
+                document.querySelector(".login-form").dispatchEvent(new Event("submit"));
+            } else {
+                mostrarAlertaGlobal("❌ QR inválido. Formato esperado: TELEFONO|CONTRASEÑA");
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Error en el formato del QR.");
+        }
+    }
+}
+    // Cargar perfil del pasajero
+    async function cargarPerfilPasajero() {
+	mostrarModalCarga();
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero', {
+  credentials: 'same-origin'
+});
+            const data = await response.json();
+
+            if (data.success) {
+                const nombre = document.getElementById("nombre-pasajero");
+                const foto = document.getElementById("foto-pasajero");
+                const viajes = document.getElementById("viajes-realizados");
+				const estadoCuenta = document.getElementById("estado-cuenta");
+
+                if (nombre) nombre.textContent = data.nombre || "Sin nombre";
+                if (foto && data.foto_perfil) foto.src = data.foto_perfil;
+                if (viajes) {
+  viajes.textContent = "Viajes realizados: " + data.viajes_realizados;
+}
+
+// Mostrar el estado de la cuenta (activo, inactivo o bloqueado)
+if (estadoCuenta) {
+  let estadoTexto = "";
+  switch (data.estado_cuenta) {
+    case "activo":
+      estadoTexto = "Pasajero activo";
+      break;
+    case "inactivo":
+      estadoTexto = "Pasajero inactivo";
+      break;
+    case "bloqueado":
+      estadoTexto = "Pasajero bloqueado";
+      break;
+    default:
+      estadoTexto = "Estado desconocido";
+  }
+  estadoCuenta.textContent = "Estado: " + estadoTexto;
+}
+
+const idPasajeroEl = document.getElementById("id-pasajero");
+if (idPasajeroEl) {
+  idPasajeroEl.textContent = "ID del pasajero: " + data.id_pasajero;
+}
+          // 🔹 Cargar saldo del pasajero
+            try {
+                const saldoResponse = await fetch('/wp-admin/admin-ajax.php?action=obtener_saldo_pasajero', {
+                    credentials: 'same-origin'
+                });
+                const saldoData = await saldoResponse.json();
+
+                if (saldoData.success) {
+                    const saldoElemento = document.getElementById("saldo-disponible");
+                    if (saldoElemento) {
+                        const valorFormateado = Number(saldoData.data.saldo || 0).toLocaleString("es-CO", {
+                            style: "currency",
+                            currency: "COP",
+                            maximumFractionDigits: 0
+                        });
+                        saldoElemento.innerText = `Saldo disponible: ${valorFormateado}`;
+                    }
+                } else {
+                    document.getElementById("saldo-disponible").innerText = "Saldo disponible: Error";
+                }
+            } catch (error) {
+                document.getElementById("saldo-disponible").innerText = "Saldo disponible: Error";
+            }
+
+        } else {
+        }
+    } catch (error) {
+    } finally {
+    ocultarModalCarga(); // ✅ Siempre cerrar el modal, sea éxito o error
+  }
+}
+    // Solo lo llama si estamos en una página con perfil
+    if (document.getElementById("nombre-pasajero")) {
+        cargarPerfilPasajero();
+    }
+    
+    // 🔹 Botón de "Editar Perfil"
+    let editarPerfilBtnPasajero = document.querySelector(".btn-edit-pasajero");
+
+    if (editarPerfilBtnPasajero) {
+        editarPerfilBtnPasajero.addEventListener("click", function () {
+ mostrarModalCarga(); // 👈 Mostrar modal al hacer clic
+            // Primero, verificamos si el usuario es un pasajero
+            fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "https://zutko.co/editar-perfil-zutko-pasajeros/";
+                    } else {
+                        // Si no es pasajero, verificamos si es conductor
+                        fetch('/wp-admin/admin-ajax.php?action=perfil_conductor')
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.location.href = "https://zutko.co/editar-perfil-zutko-conductores/";
+								
+                                } else {
+									ocultarModalCarga(); // 👈 Ocultar modal si hay error
+                                    window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+									
+                                }
+                            })
+                            .catch(error => {
+							ocultarModalCarga(); // 👈 Ocultar modal si hay error
+                            });
+                    }
+                })
+                .catch(error => {
+				ocultarModalCarga(); // 👈 Ocultar modal si hay error
+                });
+        });
+    }
+	let telefonoAntiguo = "";
+// Cargar datos para editar perfil
+async function cargarDatosParaEditarPerfil() {
+	let viajesText = null;
+    try {
+		 mostrarModalCarga();
+        const response = await fetch('/wp-admin/admin-ajax.php?action=obtener_datos_editar_perfil_pasajero', {
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const nombre = document.getElementById("nombre-pasajero-editar");
+            const telefono = document.getElementById("telefono-pasajero-editar");
+            const email = document.getElementById("email-pasajero-editar");
+            const descripcion = document.getElementById("descripcion-pasajero-editar");
+            const fotoPerfil = document.getElementById("foto-perfil-editar");
+
+            if (nombre) nombre.value = data.nombre;
+          //  if (telefono) telefono.value = data.telefono; //
+            if (email) email.value = data.email;
+            if (descripcion) descripcion.value = data.descripcion;
+            if (fotoPerfil && data.foto_perfil) fotoPerfil.src = data.foto_perfil;
+			// 🔐 Capturamos el teléfono antiguo correctamente una vez cargado
+      if (telefono && data.telefono) {
+        telefonoAntiguo = data.telefono.trim();
+      }
+        } else {
+        }
+    } catch (error) {
+    } finally {
+        ocultarModalCarga(); // 👈 Siempre se oculta después
+    }
+}
+
+if (document.getElementById("nombre-pasajero-editar")) {
+    cargarDatosParaEditarPerfil();
+}
+
+let verificado = false;
+// Validaciones de formulario
+// 👇 Esta función debe estar AFUERA de cualquier bloque para que esté disponible globalmente
+    const toggleBtn = document.querySelector(".toggle-password");
+    const passwordInput = document.getElementById("nueva-contraseña-pasajero");
+
+    if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener("click", () => {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleBtn.textContent = "🙈";
+            } else {
+                passwordInput.type = "password";
+                toggleBtn.textContent = "👁️";
+            }
+        });
+    }
+
+    		function isPaginaCargareditp() {
+    return window.location.href.includes("/editar-perfil-zutko-pasajeros/");
+}
+	if (isPaginaCargareditp()) {
+const formEditarPerfil = document.getElementById("editar-perfil-form");
+if (formEditarPerfil) {
+    formEditarPerfil.addEventListener("submit", async function (e) {
+        e.preventDefault();
+		 mostrarModalCarga();
+        const telefono = document.getElementById("telefono-pasajero-editar");
+        const email = document.getElementById("email-pasajero-editar");
+        const nuevaContrasena = document.getElementById("nueva-contraseña-pasajero");
+
+        const mostrarError = (input, mensaje) => {
+            if (!input) {
+                mostrarAlertaGlobal("❌ " + mensaje); // fallback si no hay input
+                return;
+            }
+
+            let error = input.parentElement.querySelector(".error-msg");
+            if (!error) {
+                error = document.createElement("div");
+                error.className = "error-msg";
+                error.style.color = "red";
+                error.style.fontSize = "13px";
+                error.style.marginTop = "5px";
+                input.parentElement.appendChild(error);
+            }
+            error.textContent = mensaje;
+        };
+
+        // Limpiar errores previos
+        formEditarPerfil.querySelectorAll(".error-msg").forEach(e => e.remove());
+
+        // Validar teléfono
+        const regexTelefono = /^3\d{9}$/;
+        const tel = telefono.value.trim();
+if (tel && !regexTelefono.test(tel)) {
+    mostrarError(telefono, "El número debe tener 10 dígitos y empezar por 3");
+    ocultarModalCarga();
+    return;
+}
+
+        // Validar correo si se escribe algo
+        if (email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            mostrarError(email, "El correo no es válido");
+			ocultarModalCarga();
+            return;
+        }
+
+        // Validar contraseña si se escribe algo
+        if (nuevaContrasena && nuevaContrasena.value.trim()) {
+            const pass = nuevaContrasena.value.trim();
+            const regexPass = /^(?=.*[A-Z])(?=.*\d).{7,}$/;
+            if (!regexPass.test(pass)) {
+                mostrarError(nuevaContrasena, "Mínimo 7 caracteres, una mayúscula y un número");
+				ocultarModalCarga();
+                return;
+            }
+        }
+
+		        if (tel && tel !== telefonoAntiguo && !verificado) {
+            e.preventDefault();
+            const correo = email.value.trim();
+            const resultado = await verificarExistenciaUsuario(tel, correo);
+            if (resultado.error === "telefono") {
+                mostrarError(telefono, "📱 Este número ya está registrado.");
+                ocultarModalCarga();
+                return;
+            }
+            if (resultado.error === "error") {
+                mostrarAlertaGlobal("❌ Error verificando existencia. Intenta de nuevo.");
+                ocultarModalCarga();
+                return;
+            }
+            iniciarVerificacion(tel);
+            ocultarModalCarga();
+            return;
+        }
+		
+        const formData = new FormData(formEditarPerfil);
+
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=actualizar_perfil_pasajero', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                mostrarAlertaGlobal("✅ Perfil actualizado con éxito");
+                window.location.href = "/zutko-pasajeros/";
+            } else if (data.error) {
+                // Mostrar según el tipo de error
+                const mensaje = data.error.toLowerCase();
+                if (mensaje.includes("contraseña")) {
+                    mostrarError(nuevaContrasena, data.error);
+                } else if (mensaje.includes("teléfono")) {
+                    mostrarError(telefono, data.error);
+                } else if (mensaje.includes("correo") || mensaje.includes("email")) {
+                    mostrarError(email, data.error);
+                } else {
+                    mostrarAlertaGlobal("❌ " + data.error);
+                }
+				ocultarModalCarga();
+            } else {
+                mostrarAlertaGlobal("❌ No se pudo actualizar el perfil.");
+				ocultarModalCarga();
+            }
+
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Ocurrió un error al enviar el formulario");
+			ocultarModalCarga();
+        }
+    });
+}
+	
+async function verificarExistenciaUsuario(telefono, correo) {
+    const formData = new FormData();
+    formData.append("action", "verificar_existencia_usuario");
+    formData.append("telefono", telefono);
+    formData.append("email", correo);
+    try {
+        const res = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formData
+        });
+        return await res.json();
+    } catch (err) {
+        return { error: "error" };
+    }
+}
+
+async function iniciarVerificacion(telefono) {
+    document.getElementById("modal-verificacion").style.display = "flex";
+    document.getElementById("numero-enviado").textContent = `+57 ${telefono}`;
+    document.querySelectorAll(".codigo-digit").forEach(input => input.value = "");
+    iniciarTemporizador();
+
+    const formData = new FormData();
+    formData.append("action", "enviar_codigo_whatsapp");
+    formData.append("telefono", telefono);
+
+    try {
+        mostrarModalCarga();
+        const res = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formData
+        });
+        const data = await res.json();
+        ocultarModalCarga();
+        if (!data.success) mostrarAlertaGlobal("❌ No se pudo enviar el código. Intenta más tarde.");
+    } catch (err) {
+        ocultarModalCarga();
+    }
+}
+
+document.getElementById("verificar-codigo").addEventListener("click", async () => {
+    const codigo = Array.from(document.querySelectorAll(".codigo-digit")).map(input => input.value).join("");
+    if (codigo.length !== 4) {
+        mostrarAlertaGlobal("🔒 El código debe tener 4 dígitos");
+        return;
+    }
+    const formData = new FormData();
+    formData.append("action", "verificar_codigo_whatsapp");
+    formData.append("codigo", codigo);
+    try {
+        mostrarModalCarga();
+        const res = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formData
+        });
+        const data = await res.json();
+        ocultarModalCarga();
+        if (data.success) {
+            verificado = true;
+            document.getElementById("modal-verificacion").style.display = "none";
+            formEditarPerfil.querySelector("[type='submit']").click();
+        } else {
+            mostrarAlertaGlobal("❌ Código incorrecto. Intenta de nuevo.");
+        }
+    } catch (err) {
+        ocultarModalCarga();
+    }
+});
+
+let tiempoRestante = 180;
+let intervalo;
+function iniciarTemporizador() {
+    tiempoRestante = 180;
+    document.getElementById("contador").textContent = tiempoRestante;
+    document.getElementById("reenviar-codigo").disabled = true;
+    intervalo = setInterval(() => {
+        tiempoRestante--;
+        document.getElementById("contador").textContent = tiempoRestante;
+        if (tiempoRestante <= 0) {
+            clearInterval(intervalo);
+            document.getElementById("reenviar-codigo").disabled = false;
+        }
+    }, 1000);
+}
+
+document.getElementById("reenviar-codigo").addEventListener("click", () => {
+    const tel = document.getElementById("telefono-pasajero-editar").value.trim();
+    iniciarVerificacion(tel);
+});
+document.getElementById("cambiar-numero").addEventListener("click", () => {
+    document.getElementById("modal-verificacion").style.display = "none";
+});
+	}
+	// 🔹 Botón de "Volver a Zutko Pasajeros"
+let btnVolverPePasajero = document.getElementById("btn-volver-pe-pasajero");
+
+if (btnVolverPePasajero) {
+    btnVolverPePasajero.addEventListener("click", async function () {
+mostrarModalCarga();
+        try {
+            // Verificamos si es pasajero o conductor
+            const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero');
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = "https://zutko.co/zutko-pasajeros/";
+            } else {
+ocultarModalCarga();
+                // Verifica si es conductor
+                const responseConductor = await fetch('/wp-admin/admin-ajax.php?action=perfil_conductor');
+                const dataConductor = await responseConductor.json();
+
+                if (dataConductor.success) {
+                    mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                } else {
+                    window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+                }
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Ocurrió un error al verificar tu sesión.");
+ocultarModalCarga();
+        }
+    });
+}
+
+	// 🔹 Botón de "Mis Viajes"
+let btnMisViajes = document.getElementById("btn-mis-viajes");
+
+if (btnMisViajes) {
+    btnMisViajes.addEventListener("click", function () {
+mostrarModalCarga();
+        // Verificamos si es pasajero
+        fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "https://zutko.co/mis-viajes-zutko-pasajeros/";
+                } else {
+                    // Verifica si es conductor
+                    fetch('/wp-admin/admin-ajax.php?action=perfil_conductor')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                            } else {
+								ocultarModalCarga();
+                                window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+								
+                            }
+                        })
+                        .catch(error => {
+						ocultarModalCarga();
+                        });
+                }
+            })
+            .catch(error => {
+			ocultarModalCarga();
+            });
+    });
+}
+// == MIS VIAJES ZUTKO PASAJEROS ==
+
+// Obtener viajes del pasajero
+// Función para cargar los viajes del pasajero
+async function cargarMisViajes() {
+    try {
+		mostrarModalCarga();
+        const response = await fetch('/wp-admin/admin-ajax.php?action=obtener_viajes_pasajero', {
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const listaViajes = document.getElementById("lista-viajes");
+			listaViajes.innerHTML = '';
+
+            if (listaViajes) {
+                listaViajes.innerHTML = ''; // Limpiamos la lista antes de mostrar los viajes
+
+                if (data.viajes.length > 0) {
+                    data.viajes.forEach(viaje => {
+  // Crear un elemento de lista por cada viaje
+  const li = document.createElement("li");
+  li.classList.add("viaje-card", "estado-" + viaje.estado.replace(/\s/g, "-"));
+
+  li.innerHTML =
+    "<h4><i class='fas fa-road'></i> " + viaje.origen + " ➝ " + viaje.destino + "</h4>" +
+    "<p><strong>Estado:</strong> " + viaje.estado + "</p>" +
+    "<p><strong>Distancia:</strong> " + viaje.distancia + " km</p>" +
+    "<p><strong>Tiempo estimado:</strong> " + viaje.tiempo_estimado + " min</p>" +
+    "<p><strong>Precio:</strong> $" + parseInt(viaje.precio_total).toLocaleString() + "</p>" +
+    "<p><strong>Fecha:</strong> " + new Date(viaje.fecha_viaje).toLocaleString("es-CO") + "</p>";
+
+  listaViajes.appendChild(li);
+});
+                } else {
+                    listaViajes.innerHTML = "<li>No tienes viajes registrados.</li>";
+                }
+            }
+        } else {
+        }
+    } catch (error) {
+    } finally {
+        ocultarModalCarga(); // ✅ Siempre se oculta al final
+    }
+}
+
+// Llamamos a la función al cargar la página
+if (document.getElementById("lista-viajes")) {
+    cargarMisViajes();
+	// Filtro por estado
+document.querySelectorAll(".filtro-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const estadoSeleccionado = btn.getAttribute("data-estado");
+    const tarjetas = document.querySelectorAll(".viaje-card");
+
+    tarjetas.forEach(tarjeta => {
+      const estadoTarjeta = tarjeta.classList.contains("estado-" + estadoSeleccionado) || estadoSeleccionado === "todos";
+
+      if (estadoTarjeta) {
+        tarjeta.style.display = "block";
+      } else {
+        tarjeta.style.display = "none";
+      }
+    });
+  });
+});
+}
+
+// 🔹 Botón de "Volver a Zutko Pasajeros"
+let btnVolverZutko = document.getElementById("btn-volver-zutko");
+
+if (btnVolverZutko) {
+    btnVolverZutko.addEventListener("click", async function () {
+mostrarModalCarga();
+        try {
+            // Verificamos si es pasajero o conductor
+            const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero');
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = "https://zutko.co/zutko-pasajeros/";
+            } else {
+				ocultarModalCarga();
+                // Verifica si es conductor
+                const responseConductor = await fetch('/wp-admin/admin-ajax.php?action=perfil_conductor');
+                const dataConductor = await responseConductor.json();
+
+                if (dataConductor.success) {
+                    mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                } else {
+                    window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+                }
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Ocurrió un error al verificar tu sesión.");
+			ocultarModalCarga();
+        }
+    });
+}
+	
+		// 🔹 Botón de "Mis reembolsos"
+let btnMisReembolsos = document.getElementById("btn-mis-reembolsos");
+
+if (btnMisReembolsos) {
+    btnMisReembolsos.addEventListener("click", function () {
+mostrarModalCarga();
+        // Verificamos si es pasajero
+        fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "https://zutko.co/mis-reembolsos-zutko-pasajeros/";
+                } else {
+                    // Verifica si es conductor
+                    fetch('/wp-admin/admin-ajax.php?action=perfil_conductor')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                            } else {
+								ocultarModalCarga();
+                                window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+								
+                            }
+                        })
+                        .catch(error => {
+						ocultarModalCarga();
+                        });
+                }
+            })
+            .catch(error => {
+			ocultarModalCarga();
+            });
+    });
+}
+	
+			function isPaginaMisreembolsos() {
+    return window.location.href.includes("/mis-reembolsos-zutko-pasajeros/");
+}
+	if (isPaginaMisreembolsos()) {
+		
+		async function cargarSaldoPasajero() {
+			mostrarModalCarga();
+    const saldoElemento = document.getElementById("saldo-disponible");
+    const btnSolicitarReembolso = document.getElementById("btn-solicitar-reembolso");
+    const historialPagosLista = document.getElementById("historial-pagos");
+
+    if (!saldoElemento || !btnSolicitarReembolso || !historialPagosLista) {
+		ocultarModalCarga();
+        return;
+    }
+
+    // Formatear moneda COP
+    function formatearMoneda(valor) {
+        return Number(valor).toLocaleString("es-CO", {
+            style: "currency",
+            currency: "COP",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+    }
+
+        try {
+            // Obtener saldo
+            const resSaldo = await fetch("/wp-admin/admin-ajax.php?action=obtener_saldo_pasajero", {
+                credentials: "same-origin",
+            });
+            const dataSaldo = await resSaldo.json();
+            const saldo = dataSaldo.success ? dataSaldo.data.saldo : 0;
+
+            saldoElemento.innerText = "Saldo disponible: " + formatearMoneda(saldo);
+            btnSolicitarReembolso.disabled = saldo <= 0;
+
+            // Obtener historial
+            const resHistorial = await fetch("/wp-admin/admin-ajax.php?action=historial_reembolsos_pasajero", {
+                credentials: "same-origin",
+            });
+            const dataHistorial = await resHistorial.json();
+            historialPagosLista.innerHTML = "";
+            if (dataHistorial.success && dataHistorial.data?.pagos?.length > 0) {
+				var idPasajero = dataHistorial.data.pagos[0].id_pasajero;
+    var infoID = document.createElement("p");
+    infoID.style.marginBottom = "15px";
+    infoID.innerHTML =
+        "🆔 <strong>Tu ID de pasajero es:</strong> " + idPasajero + "<br>" +
+        "Puedes compartir este ID cuando te lo pida un agente si te comunicas para acelerar tu reembolso por <a href=\"https://wa.me/573207887257?text=Hola%2C+quiero+acelerar+mi+reembolso.+Mi+ID+de+pasajero+es+" +
+        idPasajero +
+        "\" target=\"_blank\" style=\"color:#007bff; text-decoration:underline;\">WhatsApp</a>.";
+    historialPagosLista.appendChild(infoID);
+				
+                dataHistorial.data.pagos.forEach(pago => {
+                    const li = document.createElement("li");
+                    li.innerHTML =
+    "<div><strong>Monto:</strong> " + formatearMoneda(pago.monto) + "</div>" +
+    "<div><strong>Estado:</strong> " + pago.estado_pago + "</div>" +
+    "<div><strong>Fecha:</strong> " + new Date(pago.fecha_pago).toLocaleDateString("es-CO") + "</div>";
+                    historialPagosLista.appendChild(li);
+                });
+            } else {
+                historialPagosLista.innerHTML = '<li class="sin-historial">No hay historial de reembolsos</li>';
+            }
+
+            // Cargar bancos disponibles
+            const resCuentas = await fetch("/wp-admin/admin-ajax.php?action=obtener_cuentas_bancarias_pasajero", {
+                credentials: "same-origin",
+            });
+            const dataCuentas = await resCuentas.json();
+            const cuentas = dataCuentas.success ? dataCuentas.data : {};
+            // Eliminar selector anterior si existe
+const contenedorAnterior = document.getElementById("selector-reembolso");
+if (contenedorAnterior) contenedorAnterior.remove();
+
+// Crear nuevo contenedor con ID
+const contenedor = document.createElement("div");
+contenedor.id = "selector-reembolso";  // ← importante para evitar duplicados
+contenedor.style.marginTop = "15px";
+
+            const select = document.createElement("select");
+            select.id = "banco-seleccionado";
+            select.className = "form-control";
+
+            const opciones = [];
+
+            ["bancolombia", "nequi", "bogota"].forEach(banco => {
+                const cuenta = cuentas["cuenta_" + banco];
+                const titular = cuentas["titular_" + banco];
+                if (cuenta && titular) {
+                    const option = document.createElement("option");
+                    option.value = banco;
+                    option.text = banco.charAt(0).toUpperCase() + banco.slice(1) + " - " + cuenta + " (" + titular + ")";
+                    if (cuentas.banco_preferido === banco) {
+                        option.selected = true;
+                    }
+                    opciones.push(option);
+                }
+            });
+
+            if (opciones.length > 0) {
+                const label = document.createElement("label");
+                label.innerText = "Selecciona cuenta para el reembolso:";
+                contenedor.appendChild(label);
+                opciones.forEach(op => select.appendChild(op));
+                contenedor.appendChild(select);
+                btnSolicitarReembolso.parentNode.insertBefore(contenedor, btnSolicitarReembolso);
+            }
+
+            // Evento botón
+            btnSolicitarReembolso.onclick = async () => {
+                const bancoSeleccionado = document.getElementById("banco-seleccionado")?.value || "";
+
+                if (!bancoSeleccionado) {
+                    mostrarAlertaGlobal("⚠️ Debes seleccionar una cuenta bancaria para el reembolso.");
+                    return;
+                }
+
+                if (!confirm("¿Deseas solicitar el reembolso del saldo disponible?")) return;
+
+                btnSolicitarReembolso.disabled = true;
+                btnSolicitarReembolso.innerText = "Procesando...";
+				mostrarModalCarga();
+
+                const formData = new FormData();
+                formData.append("action", "solicitar_reembolso_pasajero");
+                formData.append("banco", bancoSeleccionado);
+
+                try {
+                    const res = await fetch("/wp-admin/admin-ajax.php", {
+                        method: "POST",
+                        body: formData,
+                        credentials: "same-origin",
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+    mostrarAlertaGlobal("✅ Solicitud de reembolso enviada correctamente.");
+    await cargarSaldoPasajero();
+} else {
+mostrarAlertaGlobal("❌ Error al solicitar reembolso: " + (data.message || data.data?.message || "Error desconocido"));
+    btnSolicitarReembolso.disabled = false;
+    btnSolicitarReembolso.innerText = "Solicitar reembolso";
+	ocultarModalCarga();
+}
+                } catch (error) {
+                    mostrarAlertaGlobal("Error de red al solicitar el reembolso.");
+                    btnSolicitarReembolso.disabled = false;
+                    btnSolicitarReembolso.innerText = "Solicitar reembolso";
+					ocultarModalCarga();
+                }
+            };
+        } catch (error) {
+            saldoElemento.innerText = "Error al obtener saldo";
+            btnSolicitarReembolso.disabled = true;
+            historialPagosLista.innerHTML = '<li class="' + 'sin-historial' + '">Error al cargar historial</li>';
+										
+        } finally {
+        ocultarModalCarga(); // ✅ Siempre se oculta el modal
+    }
+    }
+
+// Ejecutar sólo si existe el contenedor de pagos pasajeros
+if (document.querySelector(".pagos-container")) {
+    cargarSaldoPasajero();
+} else {
+}
+
+	}
+	
+	// 🔹 Botón de "Volver a Zutko Pasajeros"
+let btnVolverZutkoPasajr = document.getElementById("btn-volver-zutko-pasajr");
+
+if (btnVolverZutkoPasajr) {
+    btnVolverZutkoPasajr.addEventListener("click", async function () {
+mostrarModalCarga();
+        try {
+            // Verificamos si es pasajero o conductor
+            const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero');
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = "https://zutko.co/zutko-pasajeros/";
+            } else {
+				ocultarModalCarga();
+                // Verifica si es conductor
+                const responseConductor = await fetch('/wp-admin/admin-ajax.php?action=perfil_conductor');
+                const dataConductor = await responseConductor.json();
+
+                if (dataConductor.success) {
+                    mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                } else {
+                    window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+                }
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Ocurrió un error al verificar tu sesión.");
+			ocultarModalCarga();
+        }
+    });
+}
+
+		// 🔹 Botón de "Configuracion"
+let btnConfigPasaje = document.getElementById("btn-config-pasaje");
+
+if (btnConfigPasaje) {
+    btnConfigPasaje.addEventListener("click", function () {
+mostrarModalCarga();
+        // Verificamos si es pasajero
+        fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "https://zutko.co/configuracion-zutko-pasajeros/";
+                } else {
+                    // Verifica si es conductor
+                    fetch('/wp-admin/admin-ajax.php?action=perfil_conductor')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                               mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                            } else {
+											ocultarModalCarga();
+                                window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+											
+                            }
+                        })
+                        .catch(error => {
+											ocultarModalCarga();
+                        });
+                }
+            })
+            .catch(error => {
+											ocultarModalCarga();
+            });
+    });
+}
+		function isPaginaConfigPasaje() {
+    return window.location.href.includes("/configuracion-zutko-pasajeros/");
+}
+	if (isPaginaConfigPasaje()) {
+		// Prevenir recarga accidental del formulario
+document.getElementById("config-form")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+  return false;
+});
+mostrarModalCarga();
+// Obtener el id_pasajero desde la sesión
+fetch('/wp-admin/admin-ajax.php?action=verificar_sesion_pasajero')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const id_pasajero = data.data.id_pasajero;  // Asigna correctamente el ID del pasajero
+
+            // Función para obtener el estado de la cuenta del pasajero
+            function obtenerEstadoCuenta() {
+                fetch('/wp-admin/admin-ajax.php?action=obtener_estado_cuenta_pasajero')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const estadoCuenta = data.data.estado_cuenta;
+
+                            // Mostrar el botón correcto según el estado de la cuenta
+                            if (estadoCuenta === 'activo') {
+                                document.getElementById("btn-desactivar-cuenta").style.display = "inline-block";
+                                document.getElementById("btn-activar-cuenta").style.display = "none";
+                            } else if (estadoCuenta === 'inactivo') {
+                                document.getElementById("btn-activar-cuenta").style.display = "inline-block";
+                                document.getElementById("btn-desactivar-cuenta").style.display = "none";
+                            }
+                        } else {
+                        }
+						ocultarModalCarga();
+                    })
+                    .catch(error => {
+						ocultarModalCarga();
+                    });
+            }
+
+            // Llamamos a la función para obtener el estado de la cuenta
+            obtenerEstadoCuenta();
+
+            // 🔹 Botón de eliminar cuenta
+            document.getElementById("btn-eliminar-cuenta").addEventListener("click", async function() {
+                const confirmar = await mostrarConfirmacionAsyncPersonalizada(
+  "<p>¿Estás seguro de que deseas eliminar tu cuenta permanentemente?</p>",
+  "Sí, eliminar",
+  "Cancelar"
+);
+if (!confirmar) return;
+
+                const data = new FormData();
+                data.append("action", "eliminar_cuenta_pasajero");
+                data.append("id_pasajero", id_pasajero);
+
+                fetch("/wp-admin/admin-ajax.php", {
+                    method: "POST",
+                    body: data
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        mostrarAlertaGlobal("✅ Cuenta eliminada correctamente.");
+                        window.location.href = "/"; // Redirigir a la página de inicio
+                    } else {
+                        mostrarAlertaGlobal("❌ Error al eliminar la cuenta.");
+                    }
+                })
+                .catch(error => {
+                });
+            });
+
+            // 🔹 Botón de desactivar cuenta
+            document.getElementById("btn-desactivar-cuenta").addEventListener("click", async function() {
+                const confirmar = await mostrarConfirmacionAsyncPersonalizada(
+  "<p>¿Estás seguro de que deseas desactivar temporalmente tu cuenta?</p>",
+  "Sí, desactivar",
+  "Cancelar"
+);
+if (!confirmar) return;
+
+                const data = new FormData();
+                data.append("action", "desactivar_cuenta_pasajero");
+                data.append("id_pasajero", id_pasajero);
+
+                fetch("/wp-admin/admin-ajax.php", {
+                    method: "POST",
+                    body: data
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        document.getElementById("btn-desactivar-cuenta").style.display = "none";
+                        document.getElementById("btn-activar-cuenta").style.display = "inline-block";  // Mostrar el botón de activación
+                    } else {
+                        mostrarAlertaGlobal("❌ Error al desactivar la cuenta.");
+                    }
+                })
+                .catch(error => {
+                });
+            });
+
+            // 🔹 Botón de activar cuenta
+            document.getElementById("btn-activar-cuenta").addEventListener("click", async function() {
+                const confirmar = await mostrarConfirmacionAsyncPersonalizada(
+  "<p>¿Estás seguro de que deseas activar tu cuenta?</p>",
+  "Sí, activar",
+  "Cancelar"
+);
+if (!confirmar) return;
+
+                const data = new FormData();
+                data.append("action", "activar_cuenta_pasajero");
+                data.append("id_pasajero", id_pasajero);
+
+                fetch("/wp-admin/admin-ajax.php", {
+                    method: "POST",
+                    body: data
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        document.getElementById("btn-activar-cuenta").style.display = "none";
+                        document.getElementById("btn-desactivar-cuenta").style.display = "inline-block";  // Mostrar el botón de desactivación
+                    } else {
+                        mostrarAlertaGlobal("❌ Error al activar la cuenta.");
+                    }
+                })
+                .catch(error => {
+                });
+            });
+
+        } else {
+            mostrarAlertaGlobal("❌ Debes iniciar sesión para acceder a esta sección.");
+			ocultarModalCarga();
+        }
+    })
+    .catch(error => {
+        mostrarAlertaGlobal("❌ Ocurrió un error al verificar la sesión.");
+		ocultarModalCarga();
+    });
+			mostrarModalCarga();
+
+fetch('/wp-admin/admin-ajax.php?action=verificar_sesion_pasajero', {
+        credentials: 'same-origin'
+    })
+    .then(res => res.json())
+    .then(usuario => {
+        if (!usuario.success) {
+            ocultarModalCarga(); // Ocultar el loader si la sesión no es válida
+            return;
+        }
+
+        const id_pasajero = usuario.data.id_pasajero;
+
+        // Obtener preferencias actuales del pasajero
+        fetch('/wp-admin/admin-ajax.php?action=obtener_preferencias_pasajero', {
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(pref => {
+                if (!pref.success) {
+                    console.error("Error al obtener preferencias del pasajero:", pref.message);
+                    ocultarModalCarga(); // Ocultar si la carga de preferencias falla
+                    return;
+                }
+
+                // --- INICIO DE LA CORRECCIÓN: Acceder a 'data' ---
+                // Las variables ahora acceden correctamente a la propiedad 'data' de la respuesta 'pref'.
+                const metodoPreferidoDB = pref.data.metodo_pago_preferido; // Viene de la DB, ej: "nequi"
+                const temaPreferidoDB = pref.data.tema_mapa_preferido;     // Viene de la DB, ej: "automatico"
+                // --- FIN DE LA CORRECCIÓN ---
+
+
+                // --- INICIO CAMBIO MÉTODO DE PAGO (Radio Buttons) ---
+                // Marcar el método de pago preferido que viene de la base de datos
+                if (metodoPreferidoDB) {
+                    // Selecciona el radio button por su 'name' (que ahora es 'metodo-pago-pref-pasajero') y su 'value'
+                    const metodoRadio = document.querySelector(
+  'input[name="metodo-pago-pref-pasajero"][value="' + metodoPreferidoDB + '"]'
+);
+                    if (metodoRadio) {
+                        metodoRadio.checked = true;
+                    }
+                    // Si no se encuentra, no se hace nada, el usuario puede seleccionarlo.
+                }
+                // --- FIN CAMBIO MÉTODO DE PAGO ---
+
+                // Marcar tema visual preferido (ya era un radio, solo asegurar acceso a temaPreferidoDB)
+                if (temaPreferidoDB) {
+                    // El ID de los radio buttons del tema es "tema-oscuro" o "tema-automatico"
+                    const temaId = "tema-" + temaPreferidoDB;
+                    const temaRadio = document.getElementById(temaId);
+
+                    if (temaRadio) {
+                        temaRadio.checked = true;
+                    }
+                    // Si no se encuentra, no se hace nada.
+                }
+
+                ocultarModalCarga(); // Ocultar loader una vez que las preferencias se han cargado y marcado
+            })
+            .catch(err => {
+                console.error("Error de red al obtener preferencias del pasajero:", err);
+                ocultarModalCarga(); // Asegúrate de ocultar el loader si hay un error de red
+            });
+
+        // Función para guardar las preferencias del pasajero
+        const guardarPreferencias = () => {
+            // Obtener el método de pago seleccionado (ahora es un radio button por su 'name' y 'checked')
+            const metodoSeleccionado = document.querySelector('input[name="metodo-pago-pref-pasajero"]:checked')?.value || '';
+
+            // Obtener el tema del mapa seleccionado (ya era un radio button)
+            const temaSeleccionado = document.querySelector('input[name="tema-mappp"]:checked')?.id?.replace("tema-", "") || '';
+
+            const formData = new FormData();
+            formData.append("action", "guardar_preferencias_pasajero");
+            formData.append("metodo_pago", metodoSeleccionado);
+            formData.append("tema_mapa", temaSeleccionado);
+
+            // Enviar las preferencias al backend
+            fetch("/wp-admin/admin-ajax.php", {
+                    method: "POST",
+                    body: formData,
+                    credentials: 'same-origin' // Mantener credentials para enviar cookies de sesión
+                })
+                .then(res => res.json())
+                .then(r => {
+                    if (r.success) {
+                        // console.log("📦 Preferencias actualizadas:", r); // Puedes mantener este log para confirmar el guardado
+                    } else {
+                        console.error("❌ Error al guardar las preferencias:", r.message);
+                        mostrarAlertaGlobal("❌ Error al guardar las preferencias.");
+                    }
+                })
+                .catch(err => {
+                    console.error("❌ Error de red al guardar las preferencias:", err);
+                    mostrarAlertaGlobal("⚠️ Error de red al guardar las preferencias.");
+                });
+        };
+
+        // Asignamos los eventos a los radios de métodos de pago
+        document.querySelectorAll('input[name="metodo-pago-pref-pasajero"]').forEach(input => {
+            input.disabled = false; // Habilitar los radios
+            input.addEventListener("change", guardarPreferencias); // Guardar preferencias cuando cambia la selección
+        });
+
+        // Asignar el evento a los radios del tema del mapa (este ya estaba bien, se mantiene)
+        document.querySelectorAll('input[name="tema-mappp"]').forEach(input => {
+            input.disabled = false; // Habilitar los radios
+            input.addEventListener("change", guardarPreferencias); // Guardar preferencias cuando cambia la selección
+        });
+
+    }) // Cierre del .then(usuario => { ... })
+    .catch(err => {
+        console.error("Error de red al verificar sesión del pasajero:", err);
+        ocultarModalCarga(); // Ocultar el loader si la verificación de sesión falla
+    });
+		// 🔹 Obtener y mostrar cuentas bancarias del pasajero
+fetch('/wp-admin/admin-ajax.php?action=obtener_cuentas_bancarias_pasajero', {
+    credentials: 'same-origin'
+})
+.then(res => res.json())
+.then(data => {
+    if (!data.success) {
+        ocultarModalCarga(); // 👈
+        return;
+    }
+
+    const cuentas = data.data;
+    const bancos = ['bancolombia', 'nequi', 'bogota'];
+
+bancos.forEach(function(banco) {
+    if (cuentas['cuenta_' + banco]) {
+        const container = document.getElementById("cuentas-bancarias");
+
+        const bloque = document.createElement("div");
+        bloque.id = "bloque-" + banco;
+        bloque.className = "bloque-cuenta";
+        bloque.innerHTML =
+            "<p><strong>" + banco.charAt(0).toUpperCase() + banco.slice(1) + "</strong></p>" +
+            '<input type="text" id="cuenta-' + banco + '" value="' + cuentas['cuenta_' + banco] + '" placeholder="Número de cuenta">' +
+            '<input type="text" id="cedula-' + banco + '" value="' + cuentas['cedula_' + banco] + '" placeholder="Cédula del titular">' +
+            '<input type="text" id="titular-' + banco + '" value="' + cuentas['titular_' + banco] + '" placeholder="Nombre del titular">' +
+            '<label><input type="radio" name="banco-preferido" value="' + banco + '"> Preferido</label>' +
+            '<button type="button" onclick="this.parentNode.remove()">❌ Eliminar</button>' +
+            "<hr>";
+
+        container.appendChild(bloque);
+    }
+});
+
+    if (cuentas.banco_preferido) {
+        const radio = document.querySelector('input[name="banco-preferido"][value="' + cuentas.banco_preferido + '"]');
+        if (radio) radio.checked = true;
+    }
+	ocultarModalCarga();
+});
+
+// 🔹 Guardar cuentas bancarias del pasajero
+document.getElementById("btn-guardar-cuentas")?.addEventListener("click", function () {
+ mostrarModalCarga(); // 👈 opcional
+    const formData = new FormData();
+    formData.append('action', 'guardar_cuentas_bancarias_pasajero');
+
+['bancolombia', 'nequi', 'bogota'].forEach(function (banco) {
+    const cuenta = document.getElementById('cuenta-' + banco)?.value.trim() || '';
+    const cedula = document.getElementById('cedula-' + banco)?.value.trim() || '';
+    const titular = document.getElementById('titular-' + banco)?.value.trim() || '';
+
+    formData.append('cuenta_' + banco, cuenta);
+    formData.append('cedula_' + banco, cedula);
+    formData.append('titular_' + banco, titular);
+});
+
+
+    const preferido = document.querySelector('input[name="banco-preferido"]:checked');
+    formData.append('banco_preferido', preferido ? preferido.value : '');
+
+    fetch('/wp-admin/admin-ajax.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(res => res.json())
+    .then(function(result) {
+        if (result.success) {
+            mostrarAlertaGlobal("✅ Cuentas guardadas correctamente");
+        } else {
+            mostrarAlertaGlobal("❌ Error al guardar cuentas");
+        }
+		ocultarModalCarga();
+    })
+    .catch(function(err) {
+		ocultarModalCarga();
+    });
+});
+
+// 🔹 Agregar visualmente una cuenta al listado
+document.getElementById("agregar-cuenta")?.addEventListener("click", function () {
+    const banco = document.getElementById("banco-cuenta").value.trim().toLowerCase();
+    const numero = document.getElementById("numero-cuenta").value.trim();
+    const cedula = document.getElementById("cedula-titular").value.trim();
+    const titular = document.getElementById("nombre-titular").value.trim();
+
+    if (!banco || !numero || !cedula || !titular) {
+        mostrarAlertaGlobal("⚠️ Por favor completa todos los campos antes de agregar.");
+        return;
+    }
+
+    const container = document.getElementById("cuentas-bancarias");
+
+    if (document.getElementById("bloque-" + banco)) {
+        mostrarAlertaGlobal("⚠️ Ya agregaste una cuenta para ese banco.");
+        return;
+    }
+
+    const bloque = document.createElement("div");
+    bloque.id = "bloque-" + banco;
+    bloque.className = "bloque-cuenta";
+    bloque.innerHTML =
+        "<p><strong>" + banco.charAt(0).toUpperCase() + banco.slice(1) + "</strong></p>" +
+        '<input type="text" id="cuenta-' + banco + '" value="' + numero + '" placeholder="Número de cuenta">' +
+        '<input type="text" id="cedula-' + banco + '" value="' + cedula + '" placeholder="Cédula del titular">' +
+        '<input type="text" id="titular-' + banco + '" value="' + titular + '" placeholder="Nombre del titular">' +
+        '<label><input type="radio" name="banco-preferido" value="' + banco + '"> Preferido</label>' +
+        '<button type="button" onclick="this.parentNode.remove()">❌ Eliminar</button>' +
+        "<hr>";
+
+    container.appendChild(bloque);
+
+    document.getElementById("banco-cuenta").value = "";
+    document.getElementById("numero-cuenta").value = "";
+    document.getElementById("cedula-titular").value = "";
+    document.getElementById("nombre-titular").value = "";
+});
+
+}
+
+	// 🔹 Botón de "Volver a Zutko Pasajeros"
+let btnVolverPasajero = document.getElementById("btn-volver-pasajero");
+
+if (btnVolverPasajero) {
+    btnVolverPasajero.addEventListener("click", async function () {
+mostrarModalCarga();
+        try {
+            // Verificamos si es pasajero o conductor
+            const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero');
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = "https://zutko.co/zutko-pasajeros/";
+            } else {
+ocultarModalCarga();
+                // Verifica si es conductor
+                const responseConductor = await fetch('/wp-admin/admin-ajax.php?action=perfil_conductor');
+                const dataConductor = await responseConductor.json();
+
+                if (dataConductor.success) {
+                    mostrarAlertaGlobal("Esta sección es solo para pasajeros.");
+                } else {
+                    window.location.href = "https://zutko.co/inicia-sesion-zutko-pasajeros/";
+                }
+            }
+        } catch (error) {
+            mostrarAlertaGlobal("❌ Ocurrió un error al verificar tu sesión.");
+ocultarModalCarga();
+        }
+    });
+}
+
+// Cerrar sesión (específicamente para el pasajero)
+    let cerrarSesionBtnPasajero = document.getElementById("cerrar-sesion-pasajero");
+    if (cerrarSesionBtnPasajero) {
+        cerrarSesionBtnPasajero.addEventListener("click", async function (e) {
+            e.preventDefault();
+mostrarModalCarga();
+            try {
+                let response = await fetch('/wp-admin/admin-ajax.php?action=cerrar_sesion_pasajero', { method: 'POST' });
+                let data = await response.json();
+
+                if (data.success) {
+                    window.location.href = "/inicia-sesion-zutko-pasajeros/"; // Redirigir al inicio de sesión de pasajeros
+                } else {
+					ocultarModalCarga();
+                }
+            } catch (error) {
+				ocultarModalCarga();
+            }
+        });
+    }
+	
+fetch('/wp-admin/admin-ajax.php?action=verificar_sesion_pasajero')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+
+            // Obtener el id_pasajero de la respuesta
+            const id_pasajero = data.data.id_pasajero;
+let encuestasPendientes = [];
+
+function iniciarEncuestasPasajero() {
+
+    fetch('/wp-admin/admin-ajax.php?action=obtener_encuestas_pendientes')
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.success && Array.isArray(data.data.encuestas)) {
+                if (data.data.encuestas.length > 0) {
+                    encuestasPendientes = data.data.encuestas;
+                    mostrarSiguienteEncuesta();
+                } else {
+                }
+            } else {
+            }
+        })
+        .catch(err => {
+        });
+}
+
+function mostrarSiguienteEncuesta() {
+
+    if (encuestasPendientes.length === 0) {
+        return;
+    }
+
+    const encuesta = encuestasPendientes.shift();
+
+    const foto = document.getElementById('foto-conductor-encuesta');
+    const nombre = document.getElementById('nombre-conductor-encuesta');
+    const modal = document.getElementById('modal-encuesta');
+
+    foto.src = encuesta.foto_conductor;
+    nombre.textContent = encuesta.nombre_conductor;
+    modal.dataset.idViaje = encuesta.id_viaje;
+
+    // Limpiar inputs
+    document.querySelectorAll('input[name="calificacion"]').forEach(r => r.checked = false);
+    document.getElementById('comentario-encuesta').value = '';
+
+    modal.style.display = 'flex';
+}
+
+document.getElementById('btn-enviar-encuesta').addEventListener('click', () => {
+    const idViaje = document.getElementById('modal-encuesta').dataset.idViaje;
+    const calificacion = document.querySelector('input[name="calificacion"]:checked')?.value;
+    const actitud = document.querySelector('input[name="actitud"]:checked')?.value;
+    const comentario = document.getElementById('comentario-encuesta').value.trim();
+
+    if (!calificacion || !actitud) {
+        mostrarAlertaGlobal("Por favor responde todas las preguntas.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("action", "guardar_encuesta_pasajero");
+    formData.append("id_viaje", idViaje);
+    formData.append("calificacion", calificacion);
+    formData.append("actitud", actitud);
+    formData.append("comentario", comentario);
+
+    fetch('/wp-admin/admin-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('modal-encuesta').style.display = 'none';
+            mostrarSiguienteEncuesta();
+        } else {
+            mostrarAlertaGlobal("Error al guardar la encuesta.");
+        }
+    })
+    .catch(err => console.error("Error al enviar encuesta:", err));
+});
+
+document.getElementById('cerrar-encuesta').addEventListener('click', () => {
+    document.getElementById('modal-encuesta').style.display = 'none';
+
+    // Mostrar la siguiente si hay
+    setTimeout(() => {
+        if (encuestasPendientes.length > 0) {
+            mostrarSiguienteEncuesta();
+        } else {
+        }
+    }, 800);
+});
+
+// 🔥 Ejecutar encuesta al inicio
+iniciarEncuestasPasajero();
+
+            // 🔹 INICIO - BLOQUE 1: Lógica de solicitud de viaje del pasajero
+            const seccionViaje = document.getElementById("solicitud-viaje");
+			            let marcadorPasajero = null;
+            if (seccionViaje) {
+				
+				    // ✅ Variable global para controlar el setInterval
+    let verificadorEstado = null;
+				let verificadorCancelacion = null;
+				let origenLat = 0, origenLng = 0, destinoLat = 0, destinoLng = 0;
+				let chatId = null;
+				let ultimaUbicacionRuta = null;
+				let viajeEnCursoData = {}; // 👈 Esto hace que sea accesible globalmente
+				let chatAbierto = false;
+				let tipoTransporteSeleccionado = null;
+
+function iniciarChatPasajero(chatIdPasajero) {
+
+    let chatAbierto = false;
+    let mensajesNoLeidos = 0;
+    const chatId = chatIdPasajero;
+
+    // 🔹 Crear burbuja
+ const chatBubble = document.createElement("div");
+chatBubble.id = "chat-bubble";
+chatBubble.style.cssText =
+  "position: fixed;" +
+  "bottom: 20px;" +
+  "right: 20px;" +
+  "background: #007bff;" +
+  "color: white;" +
+  "padding: 12px;" +
+  "border-radius: 50%;" +
+  "cursor: pointer;" +
+  "z-index: 9999;" +
+  "font-size: 20px;" +
+  "box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);";
+
+chatBubble.textContent = "💬";
+document.body.appendChild(chatBubble);
+
+// 🔹 Crear ventana de chat
+const chatWindow = document.createElement("div");
+chatWindow.id = "chat-window";
+chatWindow.style.cssText =
+  "display: none;" +
+  "position: fixed;" +
+  "bottom: 80px;" +
+  "right: 20px;" +
+  "box-shadow: 0 4px 16px rgba(0,0,0,0.2);" +
+  "width: 320px;" +
+  "max-height: 80vh;" +
+  "background: white;" +
+  "border: 1px solid #ccc;" +
+  "border-radius: 12px;" +
+  "z-index: 9999;" +
+  "display: flex;" +
+  "flex-direction: column;" +
+  "font-family: 'Segoe UI', sans-serif;" +
+  "overflow: hidden;";
+
+chatWindow.innerHTML =
+  "<div id='chat-messages' style='flex: 1; min-height: 50px; max-height: 300px; overflow-y: auto; padding: 15px; background: #f8f9fa; font-size: 14px; color: #333;'></div>" +
+  "<div style='padding: 12px; border-top: 1px solid #ddd; display: flex; flex-direction: column; gap: 8px;'>" +
+    "<input id='chat-input' type='text' placeholder='Escribe un mensaje...' " +
+      "style='padding: 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; outline: none; width: 100%; box-sizing: border-box;'/>" +
+    "<button id='send-msg' " +
+      "style='padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; white-space: nowrap; transition: background 0.3s;'>" +
+      "Enviar" +
+    "</button>" +
+  "</div>";
+
+document.body.appendChild(chatWindow);
+
+    // 🔄 Burbuja toggle
+    chatBubble.addEventListener("click", () => {
+        const abierto = chatWindow.style.display === "block";
+        chatWindow.style.display = abierto ? "none" : "block";
+        chatAbierto = !abierto;
+
+        if (chatAbierto) {
+            mensajesNoLeidos = 0;
+            actualizarBurbuja();
+        }
+
+    });
+
+    // 🔁 Función burbuja
+    function actualizarBurbuja() {
+        if (mensajesNoLeidos > 0) {
+            chatBubble.textContent = `💬 ${mensajesNoLeidos}`;
+        } else {
+            chatBubble.textContent = "💬";
+        }
+    }
+
+    // 📨 Enviar mensaje
+    setTimeout(() => {
+        const sendBtn = document.getElementById("send-msg");
+        const inputMsg = document.getElementById("chat-input");
+
+        if (!sendBtn || !inputMsg) {
+            return;
+        }
+
+        sendBtn.addEventListener("click", () => {
+            const msg = inputMsg.value;
+            if (msg.trim() === "") return;
+
+            const msgData = {
+                autor: "pasajero",
+                mensaje: msg,
+                timestamp: Date.now()
+            };
+
+            firebase.database().ref("chats/" + chatId).push(msgData)
+                .then(() => inputMsg.value = "")
+                .catch(err => console.error("❌ Error al enviar mensaje:", err));
+        });
+    }, 300);
+
+    // 👂 Escuchar mensajes
+    firebase.database().ref("chats/" + chatId).on("child_added", snapshot => {
+        const datos = snapshot.val();
+        const esMio = datos.autor === "pasajero";
+
+        if (!esMio && !chatAbierto) {
+            mensajesNoLeidos++;
+            actualizarBurbuja();
+            if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+        }
+
+        const nombre = esMio ? "Yo" : "Conductor";
+        const hora = new Date(datos.timestamp).toLocaleTimeString("es-CO", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+
+        const mensajeHTML =
+  "<div style='margin-bottom: 14px; text-align: " + (esMio ? "right" : "left") + ";'>" +
+    "<div style='display: inline-block; max-width: 80%; background: " + (esMio ? "#d1ecf1" : "#f8d7da") + "; padding: 10px 14px; border-radius: 14px;'>" +
+      "<div style='font-size: 12px; font-weight: bold; color: #555;'>" + nombre + "</div>" +
+      "<div style='font-size: 15px; margin-top: 4px;'>" + datos.mensaje + "</div>" +
+      "<div style='font-size: 11px; color: #999; text-align: right; margin-top: 6px;'>" + hora + "</div>" +
+    "</div>" +
+  "</div>";
+
+        const chatBox = document.getElementById("chat-messages");
+        chatBox.innerHTML += mensajeHTML;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+				
+function mostrarRadarEnOrigen(mapa, posicion) {
+  const radarDiv = document.createElement("div");
+  radarDiv.className = "radar-effect";
+
+  const overlayRadar = new google.maps.OverlayView();
+  overlayRadar.onAdd = function () {
+    this.getPanes().overlayLayer.appendChild(radarDiv);
+  };
+
+  overlayRadar.draw = function () {
+    const projection = this.getProjection();
+    const posPixel = projection.fromLatLngToDivPixel(posicion);
+    radarDiv.style.left = posPixel.x + "px";
+    radarDiv.style.top = posPixel.y + "px";
+  };
+
+  overlayRadar.onRemove = function () {
+    radarDiv.remove();
+  };
+
+  overlayRadar.setMap(mapa);
+
+  // Guardamos referencia global para poder eliminarlo después
+  window.radarOverlayOrigen = overlayRadar;
+}
+				function iniciarRadarOrigen(lat, lng) {
+  if (window.radarInterval) clearInterval(window.radarInterval);
+  if (window.radarCircles) {
+    window.radarCircles.forEach(c => c.setMap(null));
+  }
+  window.radarCircles = [];
+
+  window.radarInterval = setInterval(() => {
+    let radar = new google.maps.Circle({
+      strokeColor: '#00BFFF',
+      strokeOpacity: 0.4,
+      strokeWeight: 1,
+      fillColor: '#00BFFF',
+      fillOpacity: 0.2,
+      map: mapaZutko,
+      center: { lat, lng },
+      radius: 0,
+    });
+
+    window.radarCircles.push(radar);
+
+    let radio = 0;
+    let opacity = 0.2;
+    let anim = setInterval(() => {
+      radio += 25;
+      opacity -= 0.004;
+
+      if (radio >= 500 || opacity <= 0) {
+        radar.setMap(null);
+        clearInterval(anim);
+      } else {
+        radar.setRadius(radio);
+        radar.setOptions({ fillOpacity: opacity, strokeOpacity: opacity });
+      }
+    }, 60);
+  }, 1200);
+}
+				
+window.seleccionarTipoServicio = function(tipo) {
+  tipoTransporteSeleccionado = tipo;
+  document.getElementById("modal-tipo-servicio").style.display = "none";
+	document.getElementById("btn-confirmar-viaje").style.display = "block";
+  calcularRutaViaje();
+}
+
+				
+				    // 🧠 Coloca aquí la función
+    function mostrarEstadoViaje(estado, codigoSeguridad = null, nombre_conductor = "", modelo_carro = "", placa = "") {
+        const tarjetas = {
+            solicitado: document.getElementById("card-solicitado"),
+            "en curso": document.getElementById("card-en-camino"),
+            "en viaje": document.getElementById("card-en-viaje"),
+            completado: document.getElementById("card-finalizado")
+        };
+        Object.values(tarjetas).forEach(tarjeta => {
+            if (tarjeta) tarjeta.style.display = "none";
+        });
+
+        if (tarjetas[estado]) {
+  tarjetas[estado].style.display = "block";
+
+  // ✅ Si es "en curso" o "en viaje", escribe el código en la tarjeta
+  if (estado === "en curso") {
+    tarjetas[estado].innerHTML =
+      "<h4><i class='fas fa-taxi'></i> Tu conductor está en camino</h4>" +
+      "<p>Por seguridad, tu código de viaje es: <strong>" + (codigoSeguridad || "...") + "</strong></p>" +
+      "<p>Muéstrale este código cuando subas al vehículo.</p>" +
+      "<hr style='margin: 8px 0;'>" +
+      "<p><strong>Conductor:</strong> " + (nombre_conductor || "...") + "</p>" +
+      "<p><strong>Vehículo:</strong> " + (modelo_carro || "...") + " • Placa " + (placa || "...") + "</p>";
+  } else if (estado === "en viaje") {
+    tarjetas[estado].innerHTML =
+      "<h4><i class='fas fa-road'></i> Estás en viaje</h4>" +
+      "<p>Por seguridad, tu código de viaje es: <strong>" + (codigoSeguridad || "...") + "</strong></p>" +
+      "<p>Recuerda verificarlo al finalizar el viaje.</p>" +
+      "<hr style='margin: 8px 0;'>" +
+      "<p><strong>Conductor:</strong> " + (nombre_conductor || "...") + "</p>" +
+      "<p><strong>Vehículo:</strong> " + (modelo_carro || "...") + " • Placa " + (placa || "...") + "</p>";
+  } else if (estado === "solicitado") {
+    tarjetas[estado].innerHTML =
+      "<h4><i class='fas fa-map-marker-alt'></i> Solicitud Enviada</h4>" +
+      "<p>Origen: <strong>" + origenInput.value + "</strong><br>" +
+      "Destino: <strong>" + destinoInput.value + "</strong><br>" +
+      "Estado: <strong>Solicitado</strong></p>";
+  }
+
+  // 🚀 AQUI llamamos a insertar los botones
+  insertarBotonesAccion(tarjetas[estado], estado);
+}
+    }
+				
+				// 🔥 AQUI PEGAS ESTA FUNCIÓN 🔥
+function insertarBotonesAccion(tarjetaElemento, estado) {
+    if (tarjetaElemento.querySelector(".botones-accion")) return;
+
+    const divBotones = document.createElement("div");
+    divBotones.classList.add("botones-accion");
+    divBotones.style.cssText = "margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;";
+
+    // ✅ Botón Llamar al 123 (nativo del teléfono)
+    if (estado === "en curso" || estado === "en viaje") {
+        const btnLlamar = document.createElement("button");
+       btnLlamar.innerHTML = "<i class='fas fa-phone'></i> Llamar al 123";
+        btnLlamar.classList.add("btn-llamar-123");
+
+        btnLlamar.addEventListener("click", () => {
+            window.location.href = "tel:123";
+        });
+
+        divBotones.appendChild(btnLlamar);
+    }
+
+    // ✅ Botón Ayuda (en todos los estados) → WhatsApp de soporte
+    const btnAyuda = document.createElement("button");
+    btnAyuda.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Ayuda";
+    btnAyuda.classList.add("btn-ayuda");
+
+    btnAyuda.addEventListener("click", function () {
+  const idViajeActual = (viajeEnCursoData && viajeEnCursoData.id) ? viajeEnCursoData.id : "(no disponible)";
+  
+  const mensaje = encodeURIComponent(
+    "Hola, necesito ayuda urgente con mi viaje en Zutko.\n\n" +
+    "🧍 ID pasajero: " + id_pasajero + "\n" +
+    "🛣️ ID viaje: " + idViajeActual
+  );
+
+  window.open("https://wa.me/573207887257?text=" + mensaje, "_blank");
+});
+
+    divBotones.appendChild(btnAyuda);
+
+    // ✅ Botón Compartir ubicación (en curso o viaje)
+    if (estado === "en curso" || estado === "en viaje") {
+        const btnCompartir = document.createElement("button");
+        btnCompartir.innerHTML = "<i class='fas fa-map-marker-alt'></i> Compartir Ubicación";
+        btnCompartir.classList.add("btn-compartir-ubicacion");
+
+btnCompartir.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+        mostrarAlertaGlobal("🌐 Tu navegador no permite acceder a la ubicación.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+  function (pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const link = "https://www.google.com/maps?q=" + lat + "," + lng;
+
+    // Intentar usar el sistema nativo de compartir (si está disponible)
+    if (navigator.share) {
+      navigator.share({
+        title: "📍 Mi ubicación actual en Zutko",
+        text: "Estoy en esta ubicación, échale un ojo:",
+        url: link
+      }).catch(function (err) {
+        window.open(
+          "https://wa.me/?text=" + encodeURIComponent("📍 Estoy aquí: " + link),
+          "_blank"
+        );
+      });
+    } else {
+      // Si no tiene share API, abrir WhatsApp con el link
+      window.open(
+        "https://wa.me/?text=" + encodeURIComponent("📍 Estoy aquí: " + link),
+        "_blank"
+      );
+    }
+  },
+  function (err) {
+    mostrarAlertaGlobal("❌ No se pudo obtener la ubicación. Por favor, activa el GPS.");
+  }
+);
+});
+
+        divBotones.appendChild(btnCompartir);
+    }
+
+    tarjetaElemento.appendChild(divBotones);
+}
+				
+				let marcadorConductor = null;
+let intervaloUbicacionConductor = null;
+				let ultimaUbicacionConductor = null;
+				let estadoViaje = "solicitado"; // Inicializar en "solicitado"
+				let rutaGenerada = false; // Flag para controlar que solo se genere la ruta una vez
+				let viajeEnCurso = false;  // Variable para controlar si el viaje ya está en curso
+				let viajeCompletado = false; // Nuevo: Estado del viaje
+				
+				// 🔹 FUNCIONES DE MODO NOCHE PARA PASAJERO
+function activarModoNochePasajero() {
+
+    // Aplicar los estilos del mapa si la preferencia es "oscuro"
+    mapaZutko.setOptions({ styles: estiloNoche });
+    document.body.classList.add("modo-noche"); // Cambia la UI a modo oscuro
+}
+
+const estiloNoche = [
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#3a3a3a" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#4a4a4a" }] },
+    { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#505050" }] },
+    { featureType: "road.local", elementType: "geometry", stylers: [{ color: "#606060" }] },
+    { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2a2a2a" }] },
+    { featureType: "administrative", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "administrative.neighborhood", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#263C50" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] }
+];
+
+// Función para cargar las preferencias del pasajero
+async function cargarPreferenciasPasajero() {
+    try {
+        const response = await fetch('/wp-admin/admin-ajax.php?action=obtener_preferencias_pasaj', {
+            credentials: 'same-origin'  // Asegura que se envíen las cookies
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            const tema = data.data.tema_mapa_preferido;
+
+            if (tema === "oscuro") {
+                activarModoNochePasajero();  // Activar modo noche si la preferencia es oscuro
+            } else {
+                mapaZutko.setOptions({ styles: [] });  // Dejar el mapa en estilo normal
+            }
+        }
+    } catch (error) {
+    }
+}
+				
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+        return NaN;
+    }
+
+    const R = 6371; // Radio de la tierra en kilómetros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c * 1000; // Devuelve la distancia en metros
+}
+				
+				function crearIconoCarro(rotacion) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 60;
+    canvas.height = 60;
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = "https://zutko.co/wp-content/uploads/car-icon.png";
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotacion * Math.PI) / 180);
+    ctx.drawImage(img, -20, -20, 40, 40);
+    ctx.restore();
+
+    return {
+        url: canvas.toDataURL(),
+        scaledSize: new google.maps.Size(40, 40)
+    };
+}
+	
+	
+
+function calcularRotacion(origen, destino) {
+    const dy = destino.lat - origen.lat;
+    const dx = destino.lng - origen.lng;
+    const theta = Math.atan2(dy, dx);
+    return (theta * 180) / Math.PI;
+}
+
+function iniciarSeguimientoConductor(idConductor, origenPasajero, codigoSeguridad, nombre_conductor, modelo_carro, placa) {
+    if (intervaloUbicacionConductor) clearInterval(intervaloUbicacionConductor);
+    intervaloUbicacionConductor = setInterval(async () => {
+					// ✅ Verificamos si ya está en viaje desde el backend (al recargar por ejemplo)
+if (!viajeEnCurso) {
+    try {
+        const estado = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero')
+            .then(res => res.json());
+console.log("📦 Datos recibidos del backend:", estado);
+if (estado.success && estado.data?.estado === "en viaje") {
+    viajeEnCurso = true;
+console.log("¿Es moto?", estado.data?.moto == 1);
+	
+    mostrarEstadoViaje("en viaje", estado.data?.codigo_seguridad, estado.data?.nombre_conductor, estado.data?.modelo_carro, estado.data?.placa);
+    marcadorPasajero?.setMap(null);
+}
+    } catch (err) {
+    }
+}
+        try {
+            const res = await fetch("/wp-admin/admin-ajax.php?action=obtener_ubicacion_conductor&id_conductor=" + idConductor);
+            const data = await res.json();
+let posicionConductor = null;
+            if (data.success) {
+                posicionConductor = { lat: parseFloat(data.latitud), lng: parseFloat(data.longitud) };
+
+                let iconoURL = "";
+                if (data.moto == 1) {
+                    iconoURL = "https://zutko.co/wp-content/uploads/IconCond.png";
+                } else {
+                    iconoURL = "https://zutko.co/wp-content/uploads/car-icon.png";
+                }
+				                // Verificar si el conductor está a menos de 100 metros del destino
+                const distancia = calcularDistancia(posicionConductor.lat, posicionConductor.lng, destinoLat, destinoLng);
+
+                if (distancia <= 100) { // Solo consultar el estado si está dentro de los 100 metros
+                    // Llamar a la función que verifica el estado del viaje
+                    verificarEstadoViaje();
+				}
+
+				                function verificarEstadoViaje() {
+                    fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                   const estadoFinal = data.data?.estado;
+mostrarEstadoViaje(estadoFinal, data.data?.codigo_seguridad, data.data?.nombre_conductor, data.data?.modelo_carro, data.data?.placa);
+                                if (data.estado === 'completado') {
+                                    mostrarEstadoViaje("completado");
+                                    setTimeout(() => {
+										// 🔥 Eliminar chat y escucha antes de recargar
+firebase.database().ref("chats/" + chatId)?.off();
+document.getElementById("chat-bubble")?.remove();
+document.getElementById("chat-window")?.remove();
+                                        location.reload(); // Recarga la página después de 10 segundos
+                                    }, 10000);
+                                }
+                            } else {
+                            }
+                        })
+                        .catch(error => console.error("Error en la solicitud:", error));
+                }
+				
+                // Función para verificar si el conductor está cerca del pasajero
+                async function verificarUbicacionConductor() {
+                    if (marcadorConductor && marcadorPasajero && !viajeEnCurso) {
+						
+						        const latConductor = marcadorConductor.getPosition().lat();  // Obtener latitud del conductor
+        const lngConductor = marcadorConductor.getPosition().lng();  // Obtener longitud del conductor
+        const latPasajero = marcadorPasajero.getPosition().lat();  // Obtener latitud del pasajero
+        const lngPasajero = marcadorPasajero.getPosition().lng();  // Obtener longitud del pasajero
+        const distancia = calcularDistancia(latConductor, lngConductor, latPasajero, lngPasajero); // Calcular distancia
+
+                        if (distancia <= 100) {
+
+    if (!viajeEnCurso) {
+        viajeEnCurso = true;
+
+        // 🔁 CONSULTAR estado real para obtener código, nombre, modelo, etc
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const data = result.data;
+                mostrarEstadoViaje("en viaje", data.codigo_seguridad, data.nombre_conductor, data.modelo_carro, data.placa);
+            } else {
+                mostrarEstadoViaje("en viaje"); // fallback si algo falla
+            }
+        } catch (e) {
+            mostrarEstadoViaje("en viaje");
+        }
+
+        // 🧽 Eliminar el marcador del pasajero
+        if (marcadorPasajero) marcadorPasajero.setMap(null);
+
+        // 🚗 Ruta hasta el destino
+        const destino = new google.maps.LatLng(destinoLat, destinoLng);
+        directionsService.route({
+            origin: marcadorConductor.getPosition(),
+            destination: destino,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, (result, status) => {
+            if (status === "OK") {
+                directionsRenderer.setDirections(result);
+
+                if (flechasRutaConductor) flechasRutaConductor.setMap(null);
+                if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+
+                flechasRutaConductor = new google.maps.Polyline({
+                    path: result.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100),
+                    icons: [{
+                        icon: {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            scale: 3,
+                            strokeColor: '#00d2d3',
+                            strokeOpacity: 1
+                        },
+                        offset: '0',
+                        repeat: '100px'
+                    }],
+                    strokeOpacity: 0,
+                    map: mapaZutko
+                });
+            } else {
+            }
+        });
+    }
+	document.getElementById("btn-cancelar-viaje").style.display = "none"; // Ocultar botón de cancelar
+    document.querySelector(".viaje-formulario").classList.remove("solo-cancelar");
+	document.querySelector(".viaje-formulario").classList.add("colapsado"); // Colapsar el formulario
+}
+                }
+				}
+
+                // Llama a la función para verificar la distancia
+                verificarUbicacionConductor();
+
+                let rotacion = 0;
+                if (ultimaUbicacionConductor) {
+                    rotacion = calcularRotacion(ultimaUbicacionConductor, posicionConductor);
+                }
+                ultimaUbicacionConductor = posicionConductor;
+
+                if (!marcadorConductor) {
+                   marcadorConductor = new google.maps.Marker({
+                            position: posicionConductor,
+                            map: mapaZutko,
+                            icon: {
+                                url: iconoURL,
+                                scaledSize: new google.maps.Size(40, 40)
+        }
+    });
+} else {
+                    const img = new Image();
+                    img.src = iconoURL;
+
+                    img.onload = function () {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 60;
+                        canvas.height = 60;
+                        const ctx = canvas.getContext("2d");
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.save();
+                        ctx.translate(canvas.width / 2, canvas.height / 2);
+                        ctx.rotate((rotacion * Math.PI) / 180);
+                        ctx.drawImage(img, -20, -20, 40, 40);
+                        ctx.restore();
+
+                        marcadorConductor.setIcon({
+                            url: canvas.toDataURL(),
+                            scaledSize: new google.maps.Size(40, 40),
+                            anchor: new google.maps.Point(20, 20)
+                        });
+
+                        marcadorConductor.setPosition(posicionConductor); // 🔥 REAFIRMA POSICIÓN
+                    };
+
+                    img.onerror = function () {
+                        marcadorConductor.setPosition(posicionConductor);
+                    };
+                }
+if (!viajeEnCurso) {
+                directionsService.route({
+                    origin: posicionConductor,
+                    destination: origenPasajero,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, (result, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(result);
+
+                        // Limpiar las flechas anteriores
+                        if (flechasRutaConductor) flechasRutaConductor.setMap(null); // Limpiar las flechas previas
+                        if (flechasRutaPasajero) flechasRutaPasajero.setMap(null); // Elimina las flechas de la ruta del pasajero
+
+                        // Crear las flechas de dirección en la nueva ruta
+                        flechasRutaConductor = new google.maps.Polyline({
+                            path: result.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100), // Limitamos a 100 puntos
+                            icons: [{
+                                icon: {
+                                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                                    scale: 3,
+                                    strokeColor: '#00d2d3',
+                                    strokeOpacity: 1
+                                },
+                                offset: '0',
+                                repeat: '100px'
+                            }],
+                            strokeOpacity: 0, // Solo se ven las flechas
+                            map: mapaZutko
+                        });
+                    } else {
+                    }
+                    });
+                }
+// 🔐 Evitar sobreescribir "en viaje"
+
+if (!viajeEnCurso) {
+  fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.data?.estado) {
+        const estadoFinal = data.data?.estado;
+
+        if (estadoFinal === "en viaje") {
+        } else {
+          mostrarEstadoViaje(estadoFinal, data.data?.codigo_seguridad, data.data?.nombre_conductor, data.data?.modelo_carro, data.data?.placa);
+        }
+      }
+    })
+    .catch(error => console.error("Error refrescando estado del viaje:", error));
+}
+            } else {
+            }
+        } catch (err) {
+        }
+    }, 15000);
+}
+
+                let mapaZutko, directionsService, directionsRenderer;
+				let ultimaUbicacionPasajero = null;
+				let flechasRutaPasajero = null;
+let flechasRutaConductor = null;
+let marcadorPasajero = null;
+let intervaloUbicacionPasajero = null;
+                let origenInput = document.getElementById("origen");
+                let destinoInput = document.getElementById("destino");
+
+                // 🔧 Declarar estas variables GLOBALES dentro del bloque
+                let tolls = 0; 
+                let distanciaKM = 0;
+                let tiempoMin = 0;
+                let precio = 0;
+				let estado = "solicitado";  // Agregamos estado por defecto
+				let id_conductor = null; // Inicializamos el id_conductor como null
+				
+				let intervaloConductoresCercanos = null;
+window.marcadoresConductores = [];
+
+function eliminarConductoresDelMapa() {
+    if (window.marcadoresConductores) {
+        window.marcadoresConductores.forEach(m => m.setMap(null));
+        window.marcadoresConductores = [];
+    }
+}
+
+                const precioContainer = document.getElementById("precioContainer");
+                precioContainer.style.fontWeight = "bold";
+                precioContainer.style.marginTop = "10px";
+		  
+function initMapaZutko() {
+  try {
+    // Mostrar el mapa de una con centro en Cali
+    mapaZutko = new google.maps.Map(document.getElementById("mapa-zutko"), {
+      center: { lat: 3.4516, lng: -76.5320 },
+      zoom: 15,
+      disableDefaultUI: true,
+      zoomControl: false,
+      streetViewControl: false,
+      mapTypeControl: false,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      gestureHandling: "greedy"
+    });
+
+    // Crear servicios de dirección
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({ map: mapaZutko });
+
+    // Capa de tráfico
+    var trafficLayer = new google.maps.TrafficLayer();
+    trafficLayer.setMap(mapaZutko);
+
+    // Cargar preferencias (protegido)
+    try { cargarPreferenciasPasajero(); } catch (e) { /* noop */ }
+
+    // Ubicación inicial
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var lat = pos.coords.latitude;
+        var lng = pos.coords.longitude;
+        mapaZutko.setCenter({ lat: lat - 0.005, lng: lng });
+      }, function (err) {
+        // ya hay un centro por defecto
+        console.warn("No se pudo obtener ubicación inicial:", err);
+      }, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
+      });
+    }
+
+    // Botón centrar
+    var btnCentrar = document.getElementById("btn-centrar-mapa");
+    if (btnCentrar) {
+      btnCentrar.addEventListener("click", function () {
+        if (!navigator.geolocation) {
+          alert("Geolocalización no soportada.");
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          mapaZutko.setZoom(18);
+          mapaZutko.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setTimeout(function () { mapaZutko.panBy(0, -10); }, 50);
+        }, function () {
+          alert("No pudimos obtener tu ubicación.");
+        });
+      });
+    }
+  } catch (error) {
+    mostrarAlertaGlobal("Ocurrió un error al cargar el mapa.");
+  }
+}
+	} // ← cierre de if (seccionViaje)
+      } // ← cierre de if (data.success)
+  }) // ← cierre del .then(data => { ... })
+  .catch(err => {
+      console.error("Error verificando sesión del pasajero:", err);
+      mostrarAlertaGlobal("Ocurrió un error al cargar el mapa.");
+  });
+		
+function crearIconoPasajero(rotacion) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 60;
+    canvas.height = 60;
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = "https://zutko.co/wp-content/uploads/Icon/IconoPa.png";
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotacion * Math.PI) / 180);
+    ctx.drawImage(img, -20, -20, 40, 40);
+    ctx.restore();
+
+    return {
+        url: canvas.toDataURL(),
+        scaledSize: new google.maps.Size(30, 30), // Tamaño reducido
+        anchor: new google.maps.Point(15, 15)
+    };
+}
+
+function iniciarGeolocalizacion() {
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const nuevaUbicacion = { lat, lng };
+
+                let rotacion = 0;
+                if (ultimaUbicacionPasajero) {
+                    rotacion = calcularRotacion(ultimaUbicacionPasajero, nuevaUbicacion);
+                }
+                ultimaUbicacionPasajero = nuevaUbicacion;
+				
+				// 🔁 Verificamos si el pasajero se movió más de 50 metros para recalcular ruta
+                if (ultimaUbicacionRuta) {
+                    const distancia = calcularDistancia(
+                        ultimaUbicacionRuta.lat, ultimaUbicacionRuta.lng,
+                        nuevaUbicacion.lat, nuevaUbicacion.lng
+                    );
+
+                    if (distancia > 50) {
+                        const destino = { lat: destinoLat, lng: destinoLng };
+
+                        directionsService.route({
+                            origin: nuevaUbicacion,
+                            destination: destino,
+                            travelMode: google.maps.TravelMode.DRIVING
+                        }, (result, status) => {
+                            if (status === "OK") {
+                                directionsRenderer.setDirections(result);
+
+                                if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+
+                                flechasRutaPasajero = new google.maps.Polyline({
+                                    path: result.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100),
+                                    icons: [{
+                                        icon: {
+                                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                                            scale: 3,
+                                            strokeColor: '#00d2d3',
+                                            strokeOpacity: 1
+                                        },
+                                        offset: '0',
+                                        repeat: '100px'
+                                    }],
+                                    strokeOpacity: 0,
+                                    map: mapaZutko
+                                });
+
+                                // 🧠 Actualiza la ubicación base para la próxima comparación
+                                ultimaUbicacionRuta = nuevaUbicacion;
+                            } else {
+                            }
+                        });
+                    }
+                } else {
+                    // Primera vez que se guarda la ubicación como referencia
+                    ultimaUbicacionRuta = nuevaUbicacion;
+                }
+
+                if (!marcadorPasajero) {
+                    marcadorPasajero = new google.maps.Marker({
+                        position: nuevaUbicacion,
+                        map: mapaZutko,
+                        icon: crearIconoPasajero(rotacion),
+                        title: "Tú (Pasajero)"
+                    });
+                } else {
+                    const img = new Image();
+                    img.src = "https://zutko.co/wp-content/uploads/Icon/IconoPa.png";
+
+                    img.onload = function () {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 60;
+                        canvas.height = 60;
+                        const ctx = canvas.getContext("2d");
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.save();
+                        ctx.translate(canvas.width / 2, canvas.height / 2);
+                        ctx.rotate((rotacion * Math.PI) / 180);
+                        ctx.drawImage(img, -20, -20, 40, 40);
+                        ctx.restore();
+
+                        marcadorPasajero.setIcon({
+                            url: canvas.toDataURL(),
+                            scaledSize: new google.maps.Size(30, 30),
+                            anchor: new google.maps.Point(15, 15)
+                        });
+
+                        marcadorPasajero.setPosition(nuevaUbicacion);
+                    };
+                }
+            },
+            function(error) {
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+    }
+}
+	async function obtenerUbicacionConductor(idConductor) {
+    try {
+        const res = await fetch(`/wp-admin/admin-ajax.php?action=obtener_ubicacion_conductor&id_conductor=${idConductor}`);
+        const data = await res.json();
+
+        if (data.success) {
+            return {
+                lat: parseFloat(data.latitud),
+                lng: parseFloat(data.longitud)
+            };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        return null;
+    }
+}
+
+function setupInputsViaje() {
+	const zonaPermitidaCoords = [
+{ lat: 3.5942013673372646, lng: -76.51783534703206 },
+  { lat: 3.5956110594948654, lng: -76.51406853918274 },
+  { lat: 3.5935076464341487, lng: -76.50837409503575 },
+  { lat: 3.5928139259912655, lng: -76.50125953070733 },
+  { lat: 3.597339112585331, lng: -76.49742258736339 },
+  { lat: 3.5993967616899734, lng: -76.49345992860911 },
+  { lat: 3.5956567350890785, lng: -76.48983150990696 },
+  { lat: 3.6265152270915157, lng: -76.47783554233827 },
+  { lat: 3.627487972705967, lng: -76.4799107485444 },
+  { lat: 3.626395198667729, lng: -76.48520543359516 },
+  { lat: 3.6279484120345424, lng: -76.49155678615503 },
+  { lat: 3.6314823412497486, lng: -76.49864681548773 },
+  { lat: 3.636146478454573, lng: -76.50156181400698 },
+  { lat: 3.637887087625682, lng: -76.50333273636741 },
+  { lat: 3.6395906032942418, lng: -76.50389093161297 },
+  { lat: 3.6409281521163654, lng: -76.50636782025897 },
+  { lat: 3.642208868380359, lng: -76.50679459920804 },
+  { lat: 3.642383335565296, lng: -76.50266525159088 },
+  { lat: 3.643308531276572, lng: -76.49762278067938 },
+  { lat: 3.6437130244356126, lng: -76.49280024601795 },
+  { lat: 3.643943983483788, lng: -76.49022096123046 },
+  { lat: 3.645863887659699, lng: -76.48876047636183 },
+  { lat: 3.646135656190483, lng: -76.48675899032362 },
+  { lat: 3.644068537069363, lng: -76.48575758763621 },
+  { lat: 3.6411562472087216, lng: -76.48180811841294 },
+  { lat: 3.647201949572978, lng: -76.4773966731217 },
+  { lat: 3.647943941541195, lng: -76.46989296861469 },
+  { lat: 3.643442206532028, lng: -76.46268695994041 },
+  { lat: 3.634396499729873, lng: -76.46391370408455 },
+  { lat: 3.628397193612499, lng: -76.46648617370023 },
+  { lat: 3.6008186306970758, lng: -76.48014417227462 },
+  { lat: 3.5504749116607854, lng: -76.46157264806926 },
+  { lat: 3.5181143847366916, lng: -76.45744996603129 },
+  { lat: 3.5146413253901168, lng: -76.45119730795048 },
+  { lat: 3.5170000210434873, lng: -76.44410823511245 },
+  { lat: 3.5262129358323056, lng: -76.43931591116423 },
+  { lat: 3.527902467471222, lng: -76.4314066008674 },
+  { lat: 3.542405844531309, lng: -76.42776358367159 },
+  { lat: 3.5520598971694843, lng: -76.42085889137901 },
+  { lat: 3.552593099218302, lng: -76.41679743597535 },
+  { lat: 3.548401371462424, lng: -76.41150857209422 },
+  { lat: 3.5432959276230864, lng: -76.40544616694523 },
+  { lat: 3.5437342336521436, lng: -76.39912713935787 },
+  { lat: 3.5609908393730527, lng: -76.39671956727351 },
+  { lat: 3.569679774180895, lng: -76.38800010545877 },
+  { lat: 3.560502795937783, lng: -76.36396865400715 },
+  { lat: 3.549980151451819, lng: -76.35542691537897 },
+  { lat: 3.541687012864183, lng: -76.34696491627663 },
+  { lat: 3.532852058281368, lng: -76.34579945560021 },
+  { lat: 3.532311556942198, lng: -76.3416408094346 },
+  { lat: 3.532960251164182, lng: -76.33620244792044 },
+  { lat: 3.5356103238163707, lng: -76.3303120951117 },
+  { lat: 3.5388329640419167, lng: -76.32256836145257 },
+  { lat: 3.553926179721705, lng: -76.3216373833558 },
+  { lat: 3.5606507903152185, lng: -76.3131596275658 },
+  { lat: 3.563756326519483, lng: -76.30128774118005 },
+  { lat: 3.561699123570461, lng: -76.29278830478908 },
+  { lat: 3.5601032935821957, lng: -76.28322568116387 },
+  { lat: 3.5600273392348925, lng: -76.27865896692263 },
+  { lat: 3.5568141108395452, lng: -76.27612617608669 },
+  { lat: 3.547573344620364, lng: -76.27388035186353 },
+  { lat: 3.547269684298498, lng: -76.26680007362907 },
+  { lat: 3.5462029705772258, lng: -76.2652246577975 },
+  { lat: 3.543503008283664, lng: -76.2649739312624 },
+  { lat: 3.541153026129378, lng: -76.26495697342655 },
+  { lat: 3.5392696886709123, lng: -76.26603093618849 },
+  { lat: 3.5392429637791585, lng: -76.27210383354928 },
+  { lat: 3.534919384210645, lng: -76.2731239527296 },
+  { lat: 3.5308284698118357, lng: -76.26738392010748 },
+  { lat: 3.528133607931144, lng: -76.26736503176926 },
+  { lat: 3.526485744056883, lng: -76.2701434476247 },
+  { lat: 3.524236884792775, lng: -76.27409046593976 },
+  { lat: 3.5225093271534402, lng: -76.2754261145203 },
+  { lat: 3.5204566957801227, lng: -76.27543964251933 },
+  { lat: 3.515927926641605, lng: -76.26970807923598 },
+  { lat: 3.506737967392036, lng: -76.27384815213078 },
+  { lat: 3.504181476596778, lng: -76.28599725425892 },
+  { lat: 3.4965146143522716, lng: -76.29252991426323 },
+  { lat: 3.4920422753283513, lng: -76.30402750416215 },
+  { lat: 3.49195770730591, lng: -76.31002908812356 },
+  { lat: 3.4947424606323647, lng: -76.31511473979826 },
+  { lat: 3.5002665117006906, lng: -76.32109990628497 },
+  { lat: 3.5005958164746422, lng: -76.32626029847806 },
+  { lat: 3.4996988800438884, lng: -76.32955398617173 },
+  { lat: 3.497920198066769, lng: -76.33399467549245 },
+  { lat: 3.4956284806806783, lng: -76.3419678679323 },
+  { lat: 3.490129012049697, lng: -76.35590163001747 },
+  { lat: 3.4913538551359413, lng: -76.36402665415574 },
+  { lat: 3.4931623698556074, lng: -76.3715279483214 },
+  { lat: 3.4948790817517827, lng: -76.37968364789528 },
+  { lat: 3.499323738574449, lng: -76.38976900153254 },
+  { lat: 3.4935911256202434, lng: -76.40623110097034 },
+  { lat: 3.4902811734393717, lng: -76.43270828961973 },
+  { lat: 3.489960887106328, lng: -76.45096963925339 },
+  { lat: 3.481689999009034, lng: -76.45306287346875 },
+  { lat: 3.4549595193267892, lng: -76.44682260972364 },
+  { lat: 3.3983908403329726, lng: -76.42899646189039 },
+  { lat: 3.374823228606795, lng: -76.4646578339337 },
+  { lat: 3.2371378125093706, lng: -76.5287275271465 },
+  { lat: 3.233698030378653, lng: -76.56819935844211 },
+  { lat: 3.2509784530328814, lng: -76.59269387358022 },
+  { lat: 3.3004431291473533, lng: -76.554858225687 },
+  { lat: 3.334750570886148, lng: -76.5623694422507 },
+  { lat: 3.34125698215121, lng: -76.57234250418423 },
+  { lat: 3.3381717447143444, lng: -76.58426990696499 },
+  { lat: 3.3390627526102725, lng: -76.59680933354413 },
+  { lat: 3.3640834527376695, lng: -76.58682578997706 },
+  { lat: 3.3720787640751624, lng: -76.58596421519948 },
+  { lat: 3.3800740754126553, lng: -76.58510264042192 },
+  { lat: 3.399971239071807, lng: -76.58588389392814 },
+  { lat: 3.415639159829869, lng: -76.57637278455462 },
+  { lat: 3.4465487076417647, lng: -76.58367163104268 },
+  { lat: 3.4944137630036765, lng: -76.62545151242848 },
+  { lat: 3.5130485227118537, lng: -76.62905066622017 },
+  { lat: 3.5298504282194307, lng: -76.62448013637022 },
+  { lat: 3.5526223206702836, lng: -76.62185396559995 },
+  { lat: 3.5684951860961505, lng: -76.6323736171782 },
+  { lat: 3.5977522705420046, lng: -76.65537939411313 },
+  { lat: 3.6269536034525167, lng: -76.67968623166487 },
+  { lat: 3.641023028604338, lng: -76.69222936934054 },
+  { lat: 3.6436763557830023, lng: -76.69602449559493 },
+  { lat: 3.647943022594847, lng: -76.6996893780352 },
+  { lat: 3.654308955911051, lng: -76.70352586907173 },
+  { lat: 3.6612809042449506, lng: -76.70431842230917 },
+  { lat: 3.666266687890247, lng: -76.70256051912929 },
+  { lat: 3.670245118608567, lng: -76.69710458890147 },
+  { lat: 3.671170498907378, lng: -76.69064014498821 },
+  { lat: 3.6674524218829347, lng: -76.68414801299899 },
+  { lat: 3.661163984234358, lng: -76.68045953405213 },
+  { lat: 3.6501480820814125, lng: -76.67373461891802 },
+  { lat: 3.6293010417791605, lng: -76.66127454735602 },
+  { lat: 3.6031601881306434, lng: -76.63321940203066 },
+  { lat: 3.563394906619595, lng: -76.60718468968555 },
+  { lat: 3.5503449307641803, lng: -76.60508173298305 },
+  { lat: 3.5394742742409253, lng: -76.60959416447989 },
+  { lat: 3.528034310373136, lng: -76.60854479594306 },
+  { lat: 3.5134007653307777, lng: -76.59110525823989 },
+  { lat: 3.5217297474808813, lng: -76.53959051064247 },
+  { lat: 3.5392060442877753, lng: -76.52216936295724 },
+  { lat: 3.5636511553386807, lng: -76.51302237280818 },
+  { lat: 3.5942013673372646, lng: -76.51783534703206 }
+    ];
+    const polygon = new google.maps.Polygon({
+        paths: zonaPermitidaCoords
+    });
+                    const opcionesAuto = {
+                        componentRestrictions: { country: "CO" },
+                        types: ["geocode", "establishment"]
+                    };
+
+                    let autoOrigen = new google.maps.places.Autocomplete(origenInput, opcionesAuto);
+                    let autoDestino = new google.maps.places.Autocomplete(destinoInput, opcionesAuto);
+
+                    autoOrigen.addListener("place_changed", () => {
+						const place = autoOrigen.getPlace();
+        const ubicacion = place.geometry?.location;
+		if (ubicacion && !google.maps.geometry.poly.containsLocation(ubicacion, polygon)) {
+            mostrarAlertaGlobal("📍 El origen debe estar dentro de Cali, Palmira, Jamundí, Yumbo, Mulaló, Km 18 y Dagua. Por ahora no cubrimos esa zona.");
+            origenInput.value = "";
+            return;
+        }
+                        if (origenInput.value && destinoInput.value) {
+    document.querySelector(".seguimiento-viaje").style.display = "block";
+    tipoTransporteSeleccionado = null;
+    document.getElementById("modal-tipo-servicio").style.display = "flex";
+	document.getElementById("btn-confirmar-viaje").style.display = "none";
+		document.getElementById("seguimiento-colapsado").style.display = "none";
+}
+                    });
+
+                    autoDestino.addListener("place_changed", () => {
+		const place = autoDestino.getPlace();
+        const ubicacion = place.geometry?.location;
+		if (ubicacion && !google.maps.geometry.poly.containsLocation(ubicacion, polygon)) {
+            mostrarAlertaGlobal("📍 El destino debe estar dentro de Cali, Palmira, Jamundí, Yumbo, Mulaló, Km 18 y Dagua. Por ahora no cubrimos esa zona.");
+            destinoInput.value = "";
+            return;
+        }
+                        if (origenInput.value && destinoInput.value) {
+    document.querySelector(".seguimiento-viaje").style.display = "block";
+    tipoTransporteSeleccionado = null;
+    document.getElementById("modal-tipo-servicio").style.display = "flex";
+		document.getElementById("btn-confirmar-viaje").style.display = "none";
+		document.getElementById("seguimiento-colapsado").style.display = "none";
+}
+                    });
+                }
+let precioOriginal = 0;
+let precioModificado = false;
+                function calcularRutaViaje() {
+                    let request = {
+                        origin: origenInput.value,
+                        destination: destinoInput.value,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    };
+
+                    directionsService.route(request, (result, status) => {
+                        if (status === "OK") {
+                            directionsRenderer.setDirections(result);
+							// 🔄 Eliminar flechas anteriores del pasajero
+if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+							if (flechasRutaConductor) flechasRutaConductor.setMap(null); // Elimina las flechas de la ruta del conductor
+
+// 🔄 Crear flechas nuevas para la ruta del pasajero
+flechasRutaPasajero = new google.maps.Polyline({
+  path: result.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100), // Limitamos a 100 puntos
+  icons: [{
+    icon: {
+      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 3,
+      strokeColor: '#00d2d3',
+      strokeOpacity: 1
+    },
+    offset: '0',
+    repeat: '100px'
+  }],
+  strokeOpacity: 0, // Ocultamos la línea, solo se ven flechas
+  map: mapaZutko
+});
+
+                            const leg = result.routes[0].legs[0];
+                            distanciaKM = leg.distance.value / 1000; // ✅ corregido
+                            tiempoMin = leg.duration.value / 60;     // ✅ corregido
+							
+							            // ✅ NUEVO: Guardamos las coordenadas de origen y destino
+            origenLat = leg.start_location.lat();
+            origenLng = leg.start_location.lng();
+            destinoLat = leg.end_location.lat();
+            destinoLng = leg.end_location.lng();
+
+                            const horaActual = new Date().getHours();
+                            const recargoNocturno = (horaActual >= 21 || horaActual < 5) ? 1500 : 0;
+
+                           let tarifaBase, tarifaPorKM, tarifaPorMin;
+
+if (tipoTransporteSeleccionado === "moto") {
+  tarifaBase = 3000;
+  tarifaPorKM = 500;
+  tarifaPorMin = 120;
+} else {
+  tarifaBase = 4500;
+  tarifaPorKM = 650;
+  tarifaPorMin = 180;
+}
+
+precio = tarifaBase + (distanciaKM * tarifaPorKM) + (tiempoMin * tarifaPorMin) + recargoNocturno;
+                            precio = Math.round(precio / 50) * 50;  // ✅ corregido
+							precioOriginal = precio; // Guardamos el original por única vez
+							const min = precioOriginal - 4000;
+                            const max = precioOriginal + 4000;
+                            precioModificado = false; // Reset para viajes nuevos
+precioContainer.innerHTML =
+  "<div class='info-precio'>" +
+    "<div class='precio'>" +
+      "<span class='icono'><i class='fas fa-coins'></i></span>" +
+      "<label style='font-weight: bold;font-size:16px;'>Precio estimado:</label>" +
+      "<div style='display: flex; justify-content: center; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 5px;'>" +
+        "<button id='btn-restar' style='width: 28px; height: 28px; font-size: 18px;'>−</button>" +
+        "<input id='input-precio-modificable' type='number' " +
+          "value='" + precio + "' " +
+          "style='width: 80px; font-weight: bold; text-align: center; font-size: 16px;' />" +
+        "<button id='btn-sumar' style='width: 28px; height: 28px; font-size: 18px;'>+</button>" +
+        "<button id='guardar-nuevo-precio' class='btn-guardar-precio' style='padding: 4px 8px; font-size: 16px;'>Guardar</button>" +
+      "</div>" +
+      "<small style='display:block;text-align:center;color:#007bff;font-size:16px;margin-top:4px;opacity:0.8;'>±$4.000 en múltiplos de $50</small>" +
+    "</div>" +
+    "<div class='distancia'>" +
+      "<span class='icono'><i class='fas fa-ruler-horizontal'></i></span>" +
+      "<span>Distancia: <strong>" + distanciaKM.toFixed(2) + " km</strong></span>" +
+    "</div>" +
+    "<div class='tiempo'>" +
+      "<span class='icono'><i class='fas fa-clock'></i></span>" +
+      "<span>Tiempo estimado: <strong>" + tiempoMin.toFixed(0) + " min</strong></span>" +
+    "</div>" +
+  "</div>";
+							// Esperamos al DOM del botón
+setTimeout(() => {
+  const input = document.getElementById("input-precio-modificable");
+  const btnGuardar = document.getElementById("guardar-nuevo-precio");
+  const btnSumar = document.getElementById("btn-sumar");
+  const btnRestar = document.getElementById("btn-restar");
+	
+	  // ✅ Habilitar por si el usuario vuelve al modal
+        input.disabled = false;
+        btnGuardar.disabled = false;
+        btnSumar.disabled = false;
+        btnRestar.disabled = false;
+
+  btnSumar.addEventListener("click", () => {
+    let val = parseInt(input.value);
+    if (isNaN(val)) return;
+    if (val + 50 <= max) input.value = val + 50;
+  });
+
+  btnRestar.addEventListener("click", () => {
+    let val = parseInt(input.value);
+    if (isNaN(val)) return;
+    if (val - 50 >= min) input.value = val - 50;
+  });
+
+  btnGuardar.addEventListener("click", () => {
+    const nuevoPrecio = parseInt(input.value);
+
+    if (precioModificado) {
+      mostrarAlertaGlobal("⚠️ Solo puedes modificar el precio una vez.");
+      return;
+    }
+
+    if (isNaN(nuevoPrecio) || nuevoPrecio < min || nuevoPrecio > max || nuevoPrecio % 50 !== 0) {
+      mostrarAlertaGlobal(`❗ Solo se permite entre $${min.toLocaleString("es-CO")} y $${max.toLocaleString("es-CO")}, en múltiplos de $50.`);
+      return;
+    }
+
+    precio = nuevoPrecio;
+    precioModificado = true;
+    input.disabled = true;
+    btnGuardar.disabled = true;
+    btnSumar.disabled = true;
+    btnRestar.disabled = true;
+    mostrarAlertaGlobal(`✅ Precio actualizado a $${precio.toLocaleString("es-CO")}`);
+  });
+}, 100);
+                        } else {
+                            precioContainer.innerHTML = '';
+                        }
+                    });
+                }
+	
+	async function flujoPostConfirmacionViaje(metodoPago, yaPago, origenTexto = "", destinoTexto = "") {
+    mostrarEstadoViaje("solicitado");
+		
+		let tipoVehiculoSolicitado = null;
+    try {
+        const estadoInicial = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero').then(res => res.json());
+        if (estadoInicial.success && estadoInicial.data) {
+            tipoVehiculoSolicitado = estadoInicial.data?.moto == 1 ? "moto" : "carro";
+            console.log("Tipo de vehículo solicitado: " + tipoVehiculoSolicitado);
+        }
+    } catch (err) {
+        console.error("Error obteniendo tipo de vehículo inicial:", err);
+    }
+
+    // 🔁 Iniciar intervalo de actualización de conductores cada 10 segundos
+intervaloConductoresCercanos = setInterval(async () => {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'obtener_conductores_cercanos');
+        formData.append('origen_lat', origenLat);
+        formData.append('origen_lng', origenLng);
+		
+		if (tipoVehiculoSolicitado) {
+                formData.append('tipo_transporte', tipoVehiculoSolicitado);
+            }
+
+        const response = await fetch('/wp-admin/admin-ajax.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const raw = await response.text();  // <-- Ver texto crudo por si no es JSON válido
+
+        let result;
+        try {
+            result = JSON.parse(raw);
+        } catch (err) {
+            return;
+        }
+
+        if (result.success && Array.isArray(result.conductores)) {
+
+            eliminarConductoresDelMapa();
+
+            window.marcadoresConductores = result.conductores.map(c => {
+                    let iconoConductorURL = "https://zutko.co/wp-content/uploads/car-icon.png"; // Icono por defecto
+
+                    if (tipoVehiculoSolicitado === "moto") {
+                        iconoConductorURL = "https://zutko.co/wp-content/uploads/IconCond.png";
+                    }
+
+                    return new google.maps.Marker({
+                        position: { lat: c.lat, lng: c.lng },
+                        map: mapaZutko,
+                        icon: {
+                            url: iconoConductorURL, // Usamos la URL que decidimos
+                            scaledSize: new google.maps.Size(35, 35)
+                        },
+                        title: `Conductor ${c.id}`
+                    });
+                });
+            }
+    } catch (err) {
+    }
+}, 10000);
+
+    // 🔘 Crear el marcador del pasajero
+    marcadorPasajero = new google.maps.Marker({
+        position: { lat: origenLat, lng: origenLng },
+        map: mapaZutko,
+        icon: crearIconoPasajero(0),
+        title: "Ubicación del pasajero"
+    });
+
+    iniciarGeolocalizacion();
+
+    if (verificadorEstado) clearInterval(verificadorEstado);
+    verificadorEstado = setInterval(async () => {
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success) {
+				
+                const estadoViaje = result.data?.estado;
+                const idConductor = result.data?.id_conductor;
+    const codigoSeguridad = result.data?.codigo_seguridad;
+				const nombre_conductor = result.data?.nombre_conductor;
+            const modelo_carro = result.data?.modelo_carro;
+            const placa = result.data?.placa;
+				const fetchedIdViaje = result.data?.id_viaje;
+
+                            // *** ASIGNACIÓN DE ID DE VIAJE A LA VARIABLE GLOBAL 'chatId' ***
+                            if (fetchedIdViaje) {
+                                chatId = 'viaje_' + fetchedIdViaje; // Asigna el ID de chat a la variable global 'chatId'
+                            }
+				    mostrarEstadoViaje(estadoViaje, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+
+                if (estadoViaje && ["solicitado", "en curso", "completado"].includes(estadoViaje)) {
+                    mostrarEstadoViaje(estadoViaje, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+                    document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+				
+				const inputPrecio = document.getElementById("input-precio-modificable");
+                    const btnGuardarPrecio = document.getElementById("guardar-nuevo-precio");
+                    const btnSumarPrecio = document.getElementById("btn-sumar");
+                    const btnRestarPrecio = document.getElementById("btn-restar");
+                    const smallTextAyuda = precioContainer.querySelector('small'); // Seleccionar el texto de ayuda
+
+                    if (inputPrecio) inputPrecio.disabled = true;
+                    if (btnGuardarPrecio) btnGuardarPrecio.disabled = true;
+                    if (btnSumarPrecio) btnSumarPrecio.disabled = true;
+                    if (btnRestarPrecio) btnRestarPrecio.disabled = true;
+                    if (smallTextAyuda) smallTextAyuda.style.display = 'none';
+
+                    if (estadoViaje === "en curso" && idConductor) {
+                        clearInterval(verificadorEstado);
+                        clearInterval(intervaloConductoresCercanos);
+                        eliminarConductoresDelMapa();
+				origenInput.style.display = "none";
+    destinoInput.style.display = "none";
+    document.getElementById("btn-ubicarme").style.display = "none";
+    document.getElementById("btn-confirmar-viaje").style.display = "none";
+    document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+				if (chatId) { 
+                                        iniciarChatPasajero(chatId); // Pasar el 'chatId' global
+                                    } else {
+                                        console.error("Chat ID no disponible para iniciar chat en estado 'en curso'.");
+                                    }
+				 // 🛑 Apagar radar visual
+    if (window.radarOverlayOrigen) {
+        window.radarOverlayOrigen.setMap(null);
+        window.radarOverlayOrigen = null;
+    }
+    if (window.radarInterval) clearInterval(window.radarInterval);
+    if (window.radarCircles) {
+        window.radarCircles.forEach(c => c.setMap(null));
+        window.radarCircles = [];
+    }
+                        const origenPasajero = { lat: origenLat, lng: origenLng };
+                        iniciarSeguimientoConductor(idConductor, origenPasajero, codigoSeguridad, nombre_conductor, modelo_carro, placa, "en curso");
+                        // Aquí también podrías reusar la lógica de iniciar el chat si lo encapsulas
+                    }
+                }
+            }
+        } catch (error) {
+        }
+    }, 20000);
+
+    // Ocultar campos innecesarios
+    origenInput.style.display = "none";
+    destinoInput.style.display = "none";
+    document.getElementById("btn-ubicarme").style.display = "none";
+    document.getElementById("btn-confirmar-viaje").style.display = "none";
+    document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+
+const tarjeta = document.querySelector(".viaje-card.estado-solicitado");
+if (tarjeta) {
+    tarjeta.innerHTML = `
+        <h4><i class="fas fa-map-marker-alt"></i> Solicitud Enviada</h4>
+        <p>Origen: <strong>${origenTexto || origenInput.value}</strong><br>
+        Destino: <strong>${destinoTexto || destinoInput.value}</strong><br>
+        Estado: <strong>Solicitado</strong></p>`;
+}
+	    const inputPrecioInicial = document.getElementById("input-precio-modificable");
+    const btnGuardarPrecioInicial = document.getElementById("guardar-nuevo-precio");
+    const btnSumarPrecioInicial = document.getElementById("btn-sumar");
+    const btnRestarPrecioInicial = document.getElementById("btn-restar");
+    const smallTextAyudaInicial = precioContainer.querySelector('small');
+
+    if (inputPrecioInicial) inputPrecioInicial.disabled = true;
+    if (btnGuardarPrecioInicial) btnGuardarPrecioInicial.disabled = true;
+    if (btnSumarPrecioInicial) btnSumarPrecioInicial.disabled = true;
+    if (btnRestarPrecioInicial) btnRestarPrecioInicial.disabled = true;
+    if (smallTextAyudaInicial) smallTextAyudaInicial.style.display = 'none';
+}
+				
+				function mostrarRuta(latOrigen, lngOrigen, latDestino, lngDestino) {
+    const origen = new google.maps.LatLng(latOrigen, lngOrigen);
+    const destino = new google.maps.LatLng(latDestino, lngDestino);
+
+    directionsService.route({
+        origin: origen,
+        destination: destino,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, function(response, status) {
+        if (status === "OK") {
+            directionsRenderer.setDirections(response);
+
+            // 🔁 Limpiar flechas anteriores
+            if (flechasRutaConductor) flechasRutaConductor.setMap(null);
+            if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+
+            // 🎯 Añadir flechas para visual
+            flechasRutaConductor = new google.maps.Polyline({
+                path: response.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100),
+                icons: [{
+                    icon: {
+                        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                        scale: 3,
+                        strokeColor: '#00d2d3',
+                        strokeOpacity: 1
+                    },
+                    offset: '0',
+                    repeat: '100px'
+                }],
+                strokeOpacity: 0,
+                map: mapaZutko
+            });
+
+        } else {
+        }
+    });
+}
+
+				
+				function reconstruirInfoViaje(origenTexto, destinoTexto) {
+    let request = {
+        origin: origenTexto,
+        destination: destinoTexto,
+        travelMode: google.maps.TravelMode.DRIVING
+    };
+
+    directionsService.route(request, (result, status) => {
+        if (status === "OK") {
+            directionsRenderer.setDirections(result);
+// 🔁 Limpiar flechas anteriores si existen
+if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+if (flechasRutaConductor) flechasRutaConductor.setMap(null); // Por si acaso
+
+// 🔼 Agregar flechas a la nueva ruta del pasajero
+flechasRutaPasajero = new google.maps.Polyline({
+    path: result.routes[0].legs[0].steps.flatMap(step => step.path).slice(0, 100),
+    icons: [{
+        icon: {
+            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+            scale: 3,
+            strokeColor: '#00d2d3',
+            strokeOpacity: 1
+        },
+        offset: '0',
+        repeat: '100px'
+    }],
+    strokeOpacity: 0,
+    map: mapaZutko
+});
+        } else {
+        }
+    });
+}
+				
+				
+	
+	async function recuperarEstadoPasajero() {
+    try {
+        const res = await fetch('/wp-admin/admin-ajax.php?action=recuperar_estado_pasajero', {
+            credentials: 'same-origin'
+        });
+        const data = await res.json();
+
+        if (data.success && data.data && data.data.viaje) {
+            const viaje = data.data.viaje;
+
+            const estado = viaje.estado;
+            const idConductor = viaje.id_conductor;
+			const codigoSeguridad = viaje.codigo_seguridad; // <-- así
+			const nombre_conductor = viaje.nombre_conductor;
+const modelo_carro = viaje.modelo_carro;
+const placa = viaje.placa;
+			 const chatId = `viaje_${viaje.id_viaje}`;
+            // Establecer datos
+            viajeEnCursoData = {
+                id: viaje.id_viaje,
+                origenLat: parseFloat(viaje.origen_lat),
+                origenLng: parseFloat(viaje.origen_lng),
+                destinoLat: parseFloat(viaje.destino_lat),
+                destinoLng: parseFloat(viaje.destino_lng),
+				    nombre_conductor: viaje.nombre_conductor,
+    modelo_carro: viaje.modelo_carro,
+    placa: viaje.placa
+
+            };
+			viajeEnCursoData.distancia = parseFloat(viaje.distancia).toFixed(2);
+viajeEnCursoData.tiempo = parseInt(viaje.tiempo_estimado);
+viajeEnCursoData.precio = parseFloat(viaje.precio_total);
+            // Mostrar/ocultar secciones principales
+            const mapaEl = document.getElementById("contenedor-mapa");
+            const infoEl = document.getElementById("info-viaje");
+            const configEl = document.getElementById("config-form");
+            const formularioEl = document.getElementById("formulario-viaje");
+
+            if (mapaEl) mapaEl.style.display = "block";
+            if (infoEl) infoEl.style.display = "block";
+            if (configEl) configEl.style.display = "none";
+            if (formularioEl) formularioEl.style.display = "none";
+
+            // Mostrar tarjetas y controlar elementos según estado
+            if (estado === "solicitado") {
+                mostrarEstadoViaje("solicitado");
+				document.querySelector(".seguimiento-viaje").style.display = "block";
+				    // ❗ FALTAN ESTAS LÍNEAS
+    origenLat = parseFloat(viaje.origen_lat);
+    origenLng = parseFloat(viaje.origen_lng);
+if (!window.radarInterval) {
+  iniciarRadarOrigen(origenLat, origenLng);
+}
+    await flujoPostConfirmacionViaje(viaje.metodo_pago, viaje.pagado, viaje.origen, viaje.destino);
+				// Asignar los valores recuperados a los inputs
+origenInput.value = viaje.origen;
+destinoInput.value = viaje.destino;
+// Reconstruir la ruta e información visual
+reconstruirInfoViaje(viaje.origen, viaje.destino);
+				// Inyectar la info de precio en el contenedor directamente
+precioContainer.innerHTML =
+  "<div class='info-precio'>" +
+    "<div class='precio'>" +
+      "<span class='icono'><i class='fas fa-coins'></i></span> " +
+      "<span>Precio estimado: <strong>$" + viajeEnCursoData.precio.toLocaleString("es-CO") + "</strong></span>" +
+    "</div>" +
+    "<div class='distancia'>" +
+      "<span class='icono'><i class='fas fa-ruler-horizontal'></i></span>" +
+      "<span>Distancia: <strong>" + viajeEnCursoData.distancia + " km</strong></span>" +
+    "</div>" +
+    "<div class='tiempo'>" +
+      "<span class='icono'><i class='fas fa-clock'></i></span>" +
+      "<span>Tiempo estimado: <strong>" + viajeEnCursoData.tiempo + " min</strong></span>" +
+    "</div>" +
+  "</div>";
+				document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+				document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+				
+} else if (estado === "pendiente_pago") {
+
+    document.getElementById("modal-pago").style.display = "none";
+    document.getElementById("modal-esperando-payu").style.display = "flex";
+	if (window.radarOverlayOrigen) {
+  window.radarOverlayOrigen.setMap(null);
+  window.radarOverlayOrigen = null;
+}
+
+
+    // Iniciar verificación automática cada 10s
+    verificadorPago = setInterval(async () => {
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success && result.data?.estado === "solicitado") {
+                clearInterval(verificadorPago);
+                document.getElementById("modal-esperando-payu").style.display = "none";
+
+                // Ya está definido arriba, solo actualiza si necesitas cambiar algo puntual
+
+                recuperarEstadoPasajero(); // 👈 Llamada de nuevo al recuperar estado desde cero
+            }
+        } catch (error) {
+        }
+    }, 10000);
+
+    // Terminar flujo aquí para no seguir mostrando otros estados
+    return;
+} else if ((estado === "en curso" || estado === "en viaje") && idConductor) {
+				clearInterval(intervaloConductoresCercanos);
+				eliminarConductoresDelMapa();
+ mostrarEstadoViaje(estado, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+				document.querySelector(".seguimiento-viaje").style.display = "block";
+if (window.radarInterval) clearInterval(window.radarInterval);
+if (window.radarCircles) {
+  window.radarCircles.forEach(c => c.setMap(null));
+}
+	if (!verificadorCancelacion) {
+    verificadorCancelacion = setInterval(async () => {
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success && result.data?.estado) {
+        const estado = result.data.estado;
+
+        if (estado === "cancelado") {
+            mostrarAlertaGlobal("❌ El viaje fue cancelado por el conductor.", {
+                        botones: [{
+                            texto: "Aceptar",
+                            callback: () => {
+                                clearInterval(verificadorCancelacion); // Detiene el intervalo
+                                verificadorCancelacion = null; // Resetea la variable
+                                location.reload(); // Recarga la página solo al aceptar
+                            }
+                        }]
+                    });
+        } else if (estado === "completado") {
+            mostrarAlertaGlobal("✅ El viaje ha finalizado. ¡Esperamos que lo hayas disfrutado!", {
+                        botones: [{
+                            texto: "Aceptar",
+                            callback: () => {
+                                clearInterval(verificadorCancelacion); // Detiene el intervalo
+                                verificadorCancelacion = null; // Resetea la variable
+                                location.reload(); // Recarga la página solo al aceptar
+                            }
+                        }]
+                    });
+        }
+    }
+        } catch (error) {
+        }
+    }, 15000);
+}
+
+    // Ocultar campos y botones
+    origenInput.style.display = "none";
+    destinoInput.style.display = "none";
+    document.getElementById("btn-ubicarme").style.display = "none";
+    document.getElementById("btn-confirmar-viaje").style.display = "none";
+    document.getElementById("btn-cancelar-viaje").style.display = "none";
+				document.querySelector('.viaje-formulario').classList.add('colapsado');
+
+
+    // ✅ Convertir a float todas las coordenadas
+    origenLat = parseFloat(viaje.origen_lat);
+    origenLng = parseFloat(viaje.origen_lng);
+    destinoLat = parseFloat(viaje.destino_lat);
+    destinoLng = parseFloat(viaje.destino_lng);
+	
+precioContainer.innerHTML =
+  "<div class='info-precio'>" +
+    "<div class='precio'>" +
+      "<span class='icono'><i class='fas fa-coins'></i></span> " +
+      "<span>Precio estimado: <strong>$" + viajeEnCursoData.precio.toLocaleString("es-CO") + "</strong></span>" +
+    "</div>" +
+    "<div class='distancia'>" +
+      "<span class='icono'><i class='fas fa-ruler-horizontal'></i></span>" +
+      "<span>Distancia: <strong>" + viajeEnCursoData.distancia + " km</strong></span>" +
+    "</div>" +
+    "<div class='tiempo'>" +
+      "<span class='icono'><i class='fas fa-clock'></i></span>" +
+      "<span>Tiempo estimado: <strong>" + viajeEnCursoData.tiempo + " min</strong></span>" +
+    "</div>" +
+  "</div>";
+
+    // Iniciar seguimiento y geolocalización
+    const origenPasajero = {
+        lat: origenLat,
+        lng: origenLng
+    };
+    iniciarSeguimientoConductor(idConductor, origenPasajero, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+    iniciarGeolocalizacion();
+	
+    iniciarChatPasajero(chatId);
+    // Mostrar marcador del pasajero solo si aún está en "en curso"
+    if (estado === "en curso") {
+        marcadorPasajero = new google.maps.Marker({
+            position: origenPasajero,
+            map: mapaZutko,
+            icon: crearIconoPasajero(0),
+            title: "Ubicación del pasajero"
+        });
+    }
+
+    // ✅ Asegurar que desaparezca si ya está "en viaje"
+    if (estado === "en viaje" && marcadorPasajero) {
+        marcadorPasajero.setMap(null);
+        marcadorPasajero = null;
+    }
+
+    // Obtener ubicación actual del conductor y trazar ruta correspondiente
+    obtenerUbicacionConductor(idConductor).then(conductorUbicacion => {
+        if (conductorUbicacion && conductorUbicacion.lat && conductorUbicacion.lng) {
+            const destinoRuta = (estado === "en viaje")
+                ? { lat: destinoLat, lng: destinoLng }
+                : { lat: origenLat, lng: origenLng };
+
+            mostrarRuta(
+                conductorUbicacion.lat,
+                conductorUbicacion.lng,
+                destinoRuta.lat,
+                destinoRuta.lng
+            );
+        } else {
+        }
+    });
+			// ✅ LÓGICA DE VISIBILIDAD DE BOTONES/FORMULARIO AL FINAL DEL BLOQUE 'en curso'/'en viaje'
+                if (estado === "en curso") {
+					document.querySelector(".viaje-formulario").classList.remove("colapsado");
+                   document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+				document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+                } else if (estado === "en viaje") {
+                    origenInput.style.display = "none";
+    destinoInput.style.display = "none";
+    document.getElementById("btn-ubicarme").style.display = "none";
+    document.getElementById("btn-confirmar-viaje").style.display = "none";
+    document.getElementById("btn-cancelar-viaje").style.display = "none";
+				document.querySelector('.viaje-formulario').classList.add('colapsado');
+                }
+} else if (estado === "cancelado") {
+                mostrarEstadoViaje("cancelado");
+	document.getElementById("btn-cancelar-viaje").style.display = "none";
+	document.querySelector('.viaje-formulario').classList.remove('colapsado');
+
+            } else if (estado === "completado") {
+                mostrarEstadoViaje("completado");
+document.getElementById("btn-cancelar-viaje").style.display = "none";
+				document.querySelector('.viaje-formulario').classList.remove('colapsado');
+            } else {
+				document.getElementById("btn-cancelar-viaje").style.display = "none";
+            }
+
+        } else {
+        }
+
+    } catch (err) {
+    }
+}
+recuperarEstadoPasajero(); // 👈 Llamada directa
+
+                // Cargar el mapa de Google Maps en la página
+                window.initMapaZutko = function () {
+                    initMapaZutko();
+                    setupInputsViaje();
+                };
+
+                // Cargar el script de Google Maps
+                let scriptMapa = document.createElement("script");
+		scriptMapa.setAttribute("loading", "lazy"); // 👈 Aquí lo pones
+                scriptMapa.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyA4FcjUOAuyXjMCXqAgtcQ8jqnUmjGAZ2o&libraries=places,geometry&callback=initMapaZutko";
+                scriptMapa.async = true;
+                document.body.appendChild(scriptMapa);
+				
+		function calcularPrecioConComision(valorBase) {
+    const impuesto = valorBase * 0.004;
+    const totalAntesComision = valorBase + impuesto;
+    const valorFinal = totalAntesComision / 0.90; // compensa 10% total de pérdida (PayU + 4x1000 bancario)
+    return Math.round(valorFinal);
+}
+				// Paso 1: Mostrar ventana de pago cuando se confirma origen/destino
+document.getElementById("btn-confirmar-viaje").addEventListener("click", async () => {
+    if (!origenInput.value || !destinoInput.value) {
+        mostrarAlertaGlobal("❗Por favor ingresa origen y destino.");
+        return;
+    }
+	mostrarModalCarga(); // 🟢 Mostrar loading apenas den click
+    // Paso 1: Verificar si el pasajero está bloqueado
+    try {
+        const verificarEstado = await fetch("/wp-admin/admin-ajax.php?action=verificar_estado_pasajero", {
+            credentials: 'same-origin'
+        });
+
+        const estado = await verificarEstado.json();
+
+if (estado.success && estado.data?.bloqueado) {
+    ocultarModalCarga(); // 🔴 Ocultar si está bloqueado
+
+    var mensajeHTML = "<div style='font-size:15px; text-align:left;'>" + estado.data.mensaje + "</div>" +
+                      "<p style='margin-top:10px;'>¿Deseas contactar con soporte por WhatsApp?</p>";
+
+    mostrarConfirmacionGlobal(
+        mensajeHTML,
+        function () {
+            // Confirmado
+            window.location.href = "https://wa.me/573207887257";
+        },
+        async function () {
+            // Cancelado
+            await fetch('/wp-admin/admin-ajax.php?action=cerrar_sesion', { method: 'POST' });
+            window.location.href = "/inicia-sesion-zutko-pasajeros/";
+        }
+    );
+
+    return; // 🔴 No continuar si está bloqueado
+}
+    } catch (error) {
+        mostrarAlertaGlobal("⚠️ No se pudo verificar el estado de tu cuenta.");
+	ocultarModalCarga(); // 🔴 Ocultar si está bloqueado
+        return;
+    }
+
+    document.getElementById("modal-total").textContent = `$${precio.toLocaleString("es-CO")}`;
+    // 🔸 Obtener método de pago preferido
+    fetch('/wp-admin/admin-ajax.php?action=obtener_preferencias_pasajero')
+        .then(res => res.json())
+        .then(pref => {
+
+            if (pref.success && pref.data) {
+                const metodo = pref.data.metodo_pago_preferido;
+
+                // Desmarcar todos los radios
+                document.querySelectorAll("input[name='metodo_pago']").forEach(radio => {
+                    radio.checked = false;
+                });
+
+                if (metodo) {
+                    const radio = [...document.querySelectorAll('input[name="metodo_pago"]')]
+                        .find(r => r.value.toLowerCase() === metodo.toLowerCase());
+
+                    if (radio) {
+                        radio.checked = true;
+						    const metodoActual = radio.value.toLowerCase();
+const precioFinal = (metodoActual === "pse" || metodoActual === "payu") 
+    ? calcularPrecioConComision(precio) 
+    : Math.round(precio);
+
+    document.getElementById("modal-total").textContent = `$${precioFinal.toLocaleString("es-CO")}`;
+                    } else {
+                    }
+                } else {
+                }
+            } else {
+            }
+
+            // Mostrar modal al final
+            document.getElementById("modal-pago").style.display = "flex";
+		ocultarModalCarga();
+		// ⬇️ Escuchar cambios en el método de pago y actualizar el precio del modal
+document.querySelectorAll("input[name='metodo_pago']").forEach(radio => {
+  radio.addEventListener("change", () => {
+	  
+    const seleccionado = radio.value.toLowerCase();
+	  
+	      // Si es PSE, mostrar modal temporal y desmarcar
+    if (seleccionado === "pse") {
+      document.getElementById("modal-pse-deshabilitado").style.display = "flex";
+
+      setTimeout(() => {
+        document.getElementById("modal-pse-deshabilitado").style.display = "none";
+        radio.checked = false; // Desmarcar PSE
+      }, 4000);
+
+      return; // No calcular precio ni continuar
+    }
+const nuevoPrecio = (seleccionado === "payu") 
+    ? calcularPrecioConComision(precio)
+    : Math.round(precio);
+
+
+    document.getElementById("modal-total").textContent = `$${nuevoPrecio.toLocaleString("es-CO")}`;
+  });
+});
+
+        })
+        .catch(err => {
+            document.getElementById("modal-pago").style.display = "flex"; // Mostrar modal aunque falle
+		ocultarModalCarga();
+        });
+});
+	
+// Seleccionar el botón "Ubicarme"
+const btnUbicarme = document.getElementById('btn-ubicarme');
+
+// Función para obtener la ubicación del pasajero
+function obtenerUbicacion() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Convertir las coordenadas en dirección textual
+                obtenerDireccion(lat, lng);
+            },
+            (error) => {
+                mostrarAlertaGlobal("No se pudo obtener tu ubicación.");
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        mostrarAlertaGlobal("Tu navegador no soporta geolocalización.");
+    }
+}
+
+// Función para obtener la dirección textual utilizando la API de Geocoding de Google Maps
+function obtenerDireccion(lat, lng) {
+    const geocoder = new google.maps.Geocoder();
+
+    // ✅ NUEVO: Definir el polygon aquí mismo, ya que solo se usa para la validación del origen en esta función
+    const zonaPermitidaCoords = [
+{ lat: 3.5942013673372646, lng: -76.51783534703206 },
+  { lat: 3.5956110594948654, lng: -76.51406853918274 },
+  { lat: 3.5935076464341487, lng: -76.50837409503575 },
+  { lat: 3.5928139259912655, lng: -76.50125953070733 },
+  { lat: 3.597339112585331, lng: -76.49742258736339 },
+  { lat: 3.5993967616899734, lng: -76.49345992860911 },
+  { lat: 3.5956567350890785, lng: -76.48983150990696 },
+  { lat: 3.6265152270915157, lng: -76.47783554233827 },
+  { lat: 3.627487972705967, lng: -76.4799107485444 },
+  { lat: 3.626395198667729, lng: -76.48520543359516 },
+  { lat: 3.6279484120345424, lng: -76.49155678615503 },
+  { lat: 3.6314823412497486, lng: -76.49864681548773 },
+  { lat: 3.636146478454573, lng: -76.50156181400698 },
+  { lat: 3.637887087625682, lng: -76.50333273636741 },
+  { lat: 3.6395906032942418, lng: -76.50389093161297 },
+  { lat: 3.6409281521163654, lng: -76.50636782025897 },
+  { lat: 3.642208868380359, lng: -76.50679459920804 },
+  { lat: 3.642383335565296, lng: -76.50266525159088 },
+  { lat: 3.643308531276572, lng: -76.49762278067938 },
+  { lat: 3.6437130244356126, lng: -76.49280024601795 },
+  { lat: 3.643943983483788, lng: -76.49022096123046 },
+  { lat: 3.645863887659699, lng: -76.48876047636183 },
+  { lat: 3.646135656190483, lng: -76.48675899032362 },
+  { lat: 3.644068537069363, lng: -76.48575758763621 },
+  { lat: 3.6411562472087216, lng: -76.48180811841294 },
+  { lat: 3.647201949572978, lng: -76.4773966731217 },
+  { lat: 3.647943941541195, lng: -76.46989296861469 },
+  { lat: 3.643442206532028, lng: -76.46268695994041 },
+  { lat: 3.634396499729873, lng: -76.46391370408455 },
+  { lat: 3.628397193612499, lng: -76.46648617370023 },
+  { lat: 3.6008186306970758, lng: -76.48014417227462 },
+  { lat: 3.5504749116607854, lng: -76.46157264806926 },
+  { lat: 3.5181143847366916, lng: -76.45744996603129 },
+  { lat: 3.5146413253901168, lng: -76.45119730795048 },
+  { lat: 3.5170000210434873, lng: -76.44410823511245 },
+  { lat: 3.5262129358323056, lng: -76.43931591116423 },
+  { lat: 3.527902467471222, lng: -76.4314066008674 },
+  { lat: 3.542405844531309, lng: -76.42776358367159 },
+  { lat: 3.5520598971694843, lng: -76.42085889137901 },
+  { lat: 3.552593099218302, lng: -76.41679743597535 },
+  { lat: 3.548401371462424, lng: -76.41150857209422 },
+  { lat: 3.5432959276230864, lng: -76.40544616694523 },
+  { lat: 3.5437342336521436, lng: -76.39912713935787 },
+  { lat: 3.5609908393730527, lng: -76.39671956727351 },
+  { lat: 3.569679774180895, lng: -76.38800010545877 },
+  { lat: 3.560502795937783, lng: -76.36396865400715 },
+  { lat: 3.549980151451819, lng: -76.35542691537897 },
+  { lat: 3.541687012864183, lng: -76.34696491627663 },
+  { lat: 3.532852058281368, lng: -76.34579945560021 },
+  { lat: 3.532311556942198, lng: -76.3416408094346 },
+  { lat: 3.532960251164182, lng: -76.33620244792044 },
+  { lat: 3.5356103238163707, lng: -76.3303120951117 },
+  { lat: 3.5388329640419167, lng: -76.32256836145257 },
+  { lat: 3.553926179721705, lng: -76.3216373833558 },
+  { lat: 3.5606507903152185, lng: -76.3131596275658 },
+  { lat: 3.563756326519483, lng: -76.30128774118005 },
+  { lat: 3.561699123570461, lng: -76.29278830478908 },
+  { lat: 3.5601032935821957, lng: -76.28322568116387 },
+  { lat: 3.5600273392348925, lng: -76.27865896692263 },
+  { lat: 3.5568141108395452, lng: -76.27612617608669 },
+  { lat: 3.547573344620364, lng: -76.27388035186353 },
+  { lat: 3.547269684298498, lng: -76.26680007362907 },
+  { lat: 3.5462029705772258, lng: -76.2652246577975 },
+  { lat: 3.543503008283664, lng: -76.2649739312624 },
+  { lat: 3.541153026129378, lng: -76.26495697342655 },
+  { lat: 3.5392696886709123, lng: -76.26603093618849 },
+  { lat: 3.5392429637791585, lng: -76.27210383354928 },
+  { lat: 3.534919384210645, lng: -76.2731239527296 },
+  { lat: 3.5308284698118357, lng: -76.26738392010748 },
+  { lat: 3.528133607931144, lng: -76.26736503176926 },
+  { lat: 3.526485744056883, lng: -76.2701434476247 },
+  { lat: 3.524236884792775, lng: -76.27409046593976 },
+  { lat: 3.5225093271534402, lng: -76.2754261145203 },
+  { lat: 3.5204566957801227, lng: -76.27543964251933 },
+  { lat: 3.515927926641605, lng: -76.26970807923598 },
+  { lat: 3.506737967392036, lng: -76.27384815213078 },
+  { lat: 3.504181476596778, lng: -76.28599725425892 },
+  { lat: 3.4965146143522716, lng: -76.29252991426323 },
+  { lat: 3.4920422753283513, lng: -76.30402750416215 },
+  { lat: 3.49195770730591, lng: -76.31002908812356 },
+  { lat: 3.4947424606323647, lng: -76.31511473979826 },
+  { lat: 3.5002665117006906, lng: -76.32109990628497 },
+  { lat: 3.5005958164746422, lng: -76.32626029847806 },
+  { lat: 3.4996988800438884, lng: -76.32955398617173 },
+  { lat: 3.497920198066769, lng: -76.33399467549245 },
+  { lat: 3.4956284806806783, lng: -76.3419678679323 },
+  { lat: 3.490129012049697, lng: -76.35590163001747 },
+  { lat: 3.4913538551359413, lng: -76.36402665415574 },
+  { lat: 3.4931623698556074, lng: -76.3715279483214 },
+  { lat: 3.4948790817517827, lng: -76.37968364789528 },
+  { lat: 3.499323738574449, lng: -76.38976900153254 },
+  { lat: 3.4935911256202434, lng: -76.40623110097034 },
+  { lat: 3.4902811734393717, lng: -76.43270828961973 },
+  { lat: 3.489960887106328, lng: -76.45096963925339 },
+  { lat: 3.481689999009034, lng: -76.45306287346875 },
+  { lat: 3.4549595193267892, lng: -76.44682260972364 },
+  { lat: 3.3983908403329726, lng: -76.42899646189039 },
+  { lat: 3.374823228606795, lng: -76.4646578339337 },
+  { lat: 3.2371378125093706, lng: -76.5287275271465 },
+  { lat: 3.233698030378653, lng: -76.56819935844211 },
+  { lat: 3.2509784530328814, lng: -76.59269387358022 },
+  { lat: 3.3004431291473533, lng: -76.554858225687 },
+  { lat: 3.334750570886148, lng: -76.5623694422507 },
+  { lat: 3.34125698215121, lng: -76.57234250418423 },
+  { lat: 3.3381717447143444, lng: -76.58426990696499 },
+  { lat: 3.3390627526102725, lng: -76.59680933354413 },
+  { lat: 3.3640834527376695, lng: -76.58682578997706 },
+  { lat: 3.3720787640751624, lng: -76.58596421519948 },
+  { lat: 3.3800740754126553, lng: -76.58510264042192 },
+  { lat: 3.399971239071807, lng: -76.58588389392814 },
+  { lat: 3.415639159829869, lng: -76.57637278455462 },
+  { lat: 3.4465487076417647, lng: -76.58367163104268 },
+  { lat: 3.4944137630036765, lng: -76.62545151242848 },
+  { lat: 3.5130485227118537, lng: -76.62905066622017 },
+  { lat: 3.5298504282194307, lng: -76.62448013637022 },
+  { lat: 3.5526223206702836, lng: -76.62185396559995 },
+  { lat: 3.5684951860961505, lng: -76.6323736171782 },
+  { lat: 3.5977522705420046, lng: -76.65537939411313 },
+  { lat: 3.6269536034525167, lng: -76.67968623166487 },
+  { lat: 3.641023028604338, lng: -76.69222936934054 },
+  { lat: 3.6436763557830023, lng: -76.69602449559493 },
+  { lat: 3.647943022594847, lng: -76.6996893780352 },
+  { lat: 3.654308955911051, lng: -76.70352586907173 },
+  { lat: 3.6612809042449506, lng: -76.70431842230917 },
+  { lat: 3.666266687890247, lng: -76.70256051912929 },
+  { lat: 3.670245118608567, lng: -76.69710458890147 },
+  { lat: 3.671170498907378, lng: -76.69064014498821 },
+  { lat: 3.6674524218829347, lng: -76.68414801299899 },
+  { lat: 3.661163984234358, lng: -76.68045953405213 },
+  { lat: 3.6501480820814125, lng: -76.67373461891802 },
+  { lat: 3.6293010417791605, lng: -76.66127454735602 },
+  { lat: 3.6031601881306434, lng: -76.63321940203066 },
+  { lat: 3.563394906619595, lng: -76.60718468968555 },
+  { lat: 3.5503449307641803, lng: -76.60508173298305 },
+  { lat: 3.5394742742409253, lng: -76.60959416447989 },
+  { lat: 3.528034310373136, lng: -76.60854479594306 },
+  { lat: 3.5134007653307777, lng: -76.59110525823989 },
+  { lat: 3.5217297474808813, lng: -76.53959051064247 },
+  { lat: 3.5392060442877753, lng: -76.52216936295724 },
+  { lat: 3.5636511553386807, lng: -76.51302237280818 },
+  { lat: 3.5942013673372646, lng: -76.51783534703206 }
+    ];
+    const polygon = new google.maps.Polygon({
+        paths: zonaPermitidaCoords
+    });
+
+    const latLng = new google.maps.LatLng(lat, lng);
+    geocoder.geocode({ 'location': latLng }, (results, status) => {
+        if (status === 'OK') {
+            if (results[0]) {
+                const direccion = results[0].formatted_address;
+                const ubicacionGeocoded = results[0].geometry?.location; // Coordenadas del resultado del geocoding
+
+                // Validar la ubicación obtenida por geolocalización con el polygon recién creado
+                if (ubicacionGeocoded && !google.maps.geometry.poly.containsLocation(ubicacionGeocoded, polygon)) {
+                    mostrarAlertaGlobal("📍 Tu ubicación actual no está dentro de Cali, Palmira, Jamundí, Yumbo, Mulaló, Km 18 y Dagua. Por ahora no cubrimos esa zona.");
+                    const origenInput = document.getElementById('origen'); // Asegúrate de obtener el elemento aquí
+                    origenInput.value = "";
+                    // También limpia la ruta/precio si ya había algo
+                    if (window.precioContainer) window.precioContainer.innerHTML = ''; // Asumiendo que precioContainer es global
+                    if (window.directionsRenderer) window.directionsRenderer.setDirections({routes: []}); // Asumiendo que directionsRenderer es global
+                    return; // Detiene la ejecución si está fuera de la zona
+                }
+
+                // Colocar la dirección en el campo de origen
+                const origenInput = document.getElementById('origen');
+                origenInput.value = direccion; // Mostrar la dirección textual
+
+                // Obtener el input de destino para la comprobación
+                const destinoInput = document.getElementById('destino');
+
+                // Disparar la lógica de cálculo de ruta si el destino ya está lleno
+                if (origenInput.value.trim() !== '' && destinoInput.value.trim() !== '') {
+					document.querySelector(".seguimiento-viaje").style.display = "block";
+    tipoTransporteSeleccionado = null;
+    document.getElementById("modal-tipo-servicio").style.display = "flex";
+					document.getElementById("btn-confirmar-viaje").style.display = "none";
+					document.getElementById("seguimiento-colapsado").style.display = "none";
+                }
+
+            } else {
+                mostrarAlertaGlobal('No se encontró una dirección para tu ubicación.');
+            }
+        } else {
+            mostrarAlertaGlobal('Error al obtener la dirección: ' + status);
+        }
+    });
+}
+
+// Asignar evento de clic al botón "Ubicarme"
+btnUbicarme.addEventListener('click', obtenerUbicacion);
+let email_pasajero = "";
+let nombre_pasajero = "";
+
+// Cargar perfil apenas inicia la vista
+async function cargarPerfilPasajero() {
+    try {
+        const response = await fetch('/wp-admin/admin-ajax.php?action=perfil_pasajero');
+        const result = await response.json();
+
+        if (result.success) {
+            email_pasajero = result.email;
+            nombre_pasajero = result.nombre;
+        } else {
+        }
+    } catch (error) {
+    }
+}
+
+cargarPerfilPasajero();
+
+
+// Paso 2: Confirmar método de pago
+document.getElementById("btn-confirmar-pago").addEventListener("click", async () => {
+    const metodoSeleccionado = document.querySelector('input[name="metodo_pago"]:checked');
+    if (!metodoSeleccionado) {
+        mostrarAlertaGlobal("❗ Debes seleccionar un método de pago.");
+        return;
+    }
+
+    const metodoPago = metodoSeleccionado.value.toLowerCase();
+    // ❌ Bloquear si elige PSE
+    if (metodoPago === "pse") {
+        mostrarAlertaGlobal("❌ El método PSE aún no está disponible. Elige otro.");
+        return;
+    }
+	function calcularValorConComision(valorBase) {
+    const impuesto = valorBase * 0.004;
+    const totalAntesComision = valorBase + impuesto;
+    const valorFinal = totalAntesComision / 0.90; // 10% estimado de pérdida
+    return Math.round(valorFinal);
+}
+if (metodoPago === "payu") {
+    // 🔶 Flujo especial para PayU: primero registrar el viaje en estado pendiente_pago
+    const formDataViajePayU = new FormData();
+    formDataViajePayU.append("action", "preparar_viaje_pago_tarjeta");
+    formDataViajePayU.append("origen", origenInput.value);
+    formDataViajePayU.append("destino", destinoInput.value);
+    formDataViajePayU.append("distancia", distanciaKM.toFixed(2));
+    formDataViajePayU.append("tiempo", tiempoMin.toFixed(0));
+    formDataViajePayU.append("precio", precio.toFixed(0));
+    formDataViajePayU.append("id_pasajero", id_pasajero);
+    formDataViajePayU.append("id_conductor", id_conductor);
+    formDataViajePayU.append("origen_lat", origenLat);
+    formDataViajePayU.append("origen_lng", origenLng);
+    formDataViajePayU.append("destino_lat", destinoLat);
+    formDataViajePayU.append("destino_lng", destinoLng);
+    formDataViajePayU.append("metodo_pago", metodoPago);
+	formDataViajePayU.append("tipo_transporte", tipoTransporteSeleccionado);
+
+    try {
+        const response = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formDataViajePayU
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            const idViaje = result.data.id_viaje;
+
+            // Ahora sí, generar link de PayU con referencia
+            const formDataPayU = new FormData();
+            formDataPayU.append("action", "generar_link_pago_payu");
+            const valorCobrado = calcularValorConComision(precio);
+formDataPayU.append("valor", valorCobrado);
+            formDataPayU.append("descripcion", `Pago de viaje Zutko`);
+            formDataPayU.append("email", email_pasajero);
+            formDataPayU.append("nombre", nombre_pasajero);
+            formDataPayU.append("referencia", `ZUTKO-${idViaje}`);
+
+            const pagoResponse = await fetch("/wp-admin/admin-ajax.php", {
+                method: "POST",
+                body: formDataPayU
+            });
+
+            const html = await pagoResponse.text();
+            const nuevaVentana = window.open("", "_blank");
+if (nuevaVentana) {
+    nuevaVentana.document.write(html);
+    nuevaVentana.document.close();
+
+    // Mostrar modal de espera por pago solo si la ventana se abrió bien
+    document.getElementById("modal-pago").style.display = "none";
+    document.getElementById("modal-esperando-payu").style.display = "flex";
+
+    // Iniciar verificación cada 10 segundos
+    verificadorPago = setInterval(async () => {
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success && result.data?.estado === "solicitado") {
+                clearInterval(verificadorPago);
+                document.getElementById("modal-esperando-payu").style.display = "none";
+
+                viajeEnCursoData = {
+                    id: result.data.id_viaje,
+                    origenLat,
+                    origenLng,
+                    destinoLat,
+                    destinoLng
+                };
+
+                recuperarEstadoPasajero(); // ✅ Usamos el flujo probado y completo
+            }
+        } catch (error) {
+        }
+    }, 10000);
+} else {
+    mostrarAlertaGlobal("⚠️ Por favor permite las ventanas emergentes para continuar con el pago.");
+}
+        } else {
+            mostrarAlertaGlobal("❌ Error registrando el viaje antes de redirigir a PayU.");
+        }
+    } catch (error) {
+        mostrarAlertaGlobal("⚠️ No se pudo iniciar el pago con tarjeta.");
+    }
+
+    return; // 🛑 Importante cortar el flujo aquí
+}
+	else {
+    // Para Efectivo y Nequi (yaPago = 0)
+    const yaPago = 0;
+    document.getElementById("modal-pago").style.display = "none";
+
+    const formDataViaje = new FormData();
+    formDataViaje.append("action", "solicitar_viaje_pasajero");
+    formDataViaje.append("origen", origenInput.value);
+    formDataViaje.append("destino", destinoInput.value);
+    formDataViaje.append("distancia", distanciaKM.toFixed(2));
+    formDataViaje.append("tiempo", tiempoMin.toFixed(0));
+    formDataViaje.append("precio", precio.toFixed(0));
+    formDataViaje.append("estado", estado);
+    formDataViaje.append("id_pasajero", id_pasajero);
+    formDataViaje.append("id_conductor", id_conductor);
+    formDataViaje.append("origen_lat", origenLat);
+    formDataViaje.append("origen_lng", origenLng);
+    formDataViaje.append("destino_lat", destinoLat);
+    formDataViaje.append("destino_lng", destinoLng);
+    formDataViaje.append("metodo_pago", metodoPago);
+formDataViaje.append("tipo_transporte", tipoTransporteSeleccionado);
+    formDataViaje.append("pagado", yaPago);
+
+    try {
+        const response = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: formDataViaje
+        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                           mostrarAlertaGlobal("✅ Viaje solicitado con éxito");
+							    // 🔥 Guarda el ID del viaje aquí
+							   if (!window.radarInterval) {
+  iniciarRadarOrigen(origenLat, origenLng);
+} 
+    viajeEnCursoData = {
+        id: result.data.id_viaje,
+        origenLat,
+        origenLng,
+        destinoLat,
+        destinoLng
+    };
+							const chatId = `viaje_${result.data.id_viaje}`;
+							// ⬇️ LLAMADA A TU NUEVA FUNCIÓN
+    await flujoPostConfirmacionViaje(metodoPago, yaPago);
+							
+							 // Crear el marcador para el pasajero
+                            marcadorPasajero = new google.maps.Marker({
+                                position: { lat: origenLat, lng: origenLng },  // Posición del origen
+                                map: mapaZutko,
+                                icon: crearIconoPasajero(0),  // Cambia esta URL por tu icono deseado
+                                title: "Ubicación del pasajero"
+                            });
+
+                            // Iniciar geolocalización del pasajero
+                            iniciarGeolocalizacion();
+							
+if (verificadorEstado) clearInterval(verificadorEstado);
+verificadorEstado = setInterval(async () => {
+    try {
+        const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+        const result = await response.json();
+
+        if (result.success) {
+            const estadoViaje = result.data?.estado;
+            const idConductor = result.data?.id_conductor;
+			    const codigoSeguridad = result.data?.codigo_seguridad;
+			const nombre_conductor = result.data?.nombre_conductor;
+            const modelo_carro = result.data?.modelo_carro;
+            const placa = result.data?.placa;
+
+    mostrarEstadoViaje(estadoViaje, codigoSeguridad, nombre_conductor, modelo_carro, placa); // ✅ así
+
+            if (estadoViaje && ["solicitado", "en curso", "completado"].includes(estadoViaje)) {
+                mostrarEstadoViaje(estadoViaje, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+
+                // Mostrar el botón cancelar siempre (incluso en curso, porque ya quieres permitirlo)
+                document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+
+                if (estadoViaje === "en curso" && idConductor !== null && idConductor !== "null") {
+                    clearInterval(verificadorEstado);
+			// Solo iniciar una vez el verificador de cancelación
+			    // 👇 Llamada aquí
+ const origenPasajero = {
+    lat: origenLat,
+    lng: origenLng
+};
+		
+		// 🛑 Detener actualización de otros conductores
+clearInterval(intervaloConductoresCercanos);
+eliminarConductoresDelMapa();
+
+iniciarSeguimientoConductor(idConductor, origenPasajero, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+		
+if (!verificadorCancelacion) {
+    verificadorCancelacion = setInterval(async () => {
+        try {
+            const response = await fetch('/wp-admin/admin-ajax.php?action=ver_estado_viaje_pasajero');
+            const result = await response.json();
+
+            if (result.success && result.data?.estado) {
+                const estado = result.data.estado;
+
+                if (estado === "cancelado") {
+                     mostrarAlertaGlobal("❌ El viaje fue cancelado por el conductor.", {
+                        botones: [{
+                            texto: "Aceptar",
+                            callback: () => {
+                                clearInterval(verificadorCancelacion); // Detiene el intervalo
+                                verificadorCancelacion = null; // Resetea la variable
+                                location.reload(); // Recarga la página solo al aceptar
+                            }
+                        }]
+                    });
+                } else if (estado === "completado") {
+                   mostrarAlertaGlobal("✅ El viaje ha finalizado. ¡Esperamos que lo hayas disfrutado!", {
+                        botones: [{
+                            texto: "Aceptar",
+                            callback: () => {
+                                clearInterval(verificadorCancelacion); // Detiene el intervalo
+                                verificadorCancelacion = null; // Resetea la variable
+                                location.reload(); // Recarga la página solo al aceptar
+                            }
+                        }]
+                    });
+                }
+            }
+        } catch (error) {
+        }
+    }, 15000);
+}
+                }
+            }
+
+            if (estadoViaje === "en curso" && idConductor !== null && idConductor !== "null") {
+                mostrarEstadoViaje("en curso");
+                document.querySelector(".viaje-formulario").classList.remove("colapsado");
+                   document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+				document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+iniciarChatPasajero(chatId);
+	if (window.radarInterval) clearInterval(window.radarInterval);
+if (window.radarCircles) {
+    window.radarCircles.forEach(c => c.setMap(null));
+    window.radarCircles = [];
+}
+				
+				
+            } else {
+                mostrarEstadoViaje(estadoViaje, codigoSeguridad, nombre_conductor, modelo_carro, placa);
+            }
+        } else {
+        }
+    } catch (error) {
+    }
+}, 5000);
+                            
+// Ocultar campos y botón de confirmar
+origenInput.style.display = "none";
+destinoInput.style.display = "none";
+				document.querySelectorAll('.clear-btn').forEach(x => x.style.display = 'none');
+		// Ocultar el botón 'Ubicarme' (suponiendo que tiene el id "btn-ubicarse")
+document.getElementById("btn-ubicarme").style.display = "none";
+document.getElementById("btn-confirmar-viaje").style.display = "none";
+
+// Mostrar botón de cancelar (¡esto lo debes tener en tu HTML! te digo más abajo)
+document.getElementById("btn-cancelar-viaje").style.display = "inline-block";
+				document.querySelector(".viaje-formulario").classList.add("solo-cancelar");
+
+// Actualizar la tarjeta "Solicitud Enviada"
+const tarjeta = document.querySelector(".viaje-card.estado-solicitado");
+if (tarjeta) {
+    tarjeta.innerHTML =
+        "<h4><i class='fas fa-map-marker-alt'></i> Solicitud Enviada</h4>" +
+        "<p>Origen: <strong>" + origenInput.value + "</strong><br>" +
+        "Destino: <strong>" + destinoInput.value + "</strong><br>" +
+        "Estado: <strong>Solicitado</strong></p>";
+}
+
+			} else {
+                            mostrarAlertaGlobal("❌ Error al solicitar el viaje: " + result.message);
+                        }
+                    } catch (err) {
+                        mostrarAlertaGlobal("⚠️ Error de red.");
+                    }
+				}
+                });
+				
+				// Botón cancelar en el modal de método de pago
+document.getElementById("btn-cancelar-pago").addEventListener("click", () => {
+  document.getElementById("modal-pago").style.display = "none";
+});
+				
+document.getElementById("btn-cancelar-payu-pendiente").addEventListener("click", async () => {
+    clearInterval(verificadorPago);
+    document.getElementById("modal-esperando-payu").style.display = "none";
+    mostrarModalCarga(); // 🟢 Mostrar loader
+
+    try {
+        const response = await fetch("/wp-admin/admin-ajax.php?action=cancelar_viaje_pendiente", { method: "POST" });
+        const result = await response.json();
+
+        if (result.success) {
+            // 🔄 Recargar toda la vista
+            window.location.reload();
+        } else {
+            mostrarAlertaGlobal("⚠️ No se pudo cancelar la solicitud.");
+            ocultarModalCarga(); // 🔴 Ocultar si hubo fallo
+        }
+    } catch (err) {
+        mostrarAlertaGlobal("⚠️ Hubo un problema al cancelar la solicitud.");
+        ocultarModalCarga(); // 🔴 También ocultar si hay error de red
+    }
+});
+
+				document.getElementById("btn-cancelar-viaje").addEventListener("click", async () => {
+const confirmar = await mostrarConfirmacionAsync(
+  "<p>¿Estás seguro de cancelar el viaje?</p>"
+);
+if (!confirmar) return;
+				
+				mostrarModalCarga();
+
+				  if (marcadorPasajero) {
+                        marcadorPasajero.setMap(null);  // Eliminar el marcador
+                    }
+				if (flechasRutaPasajero) flechasRutaPasajero.setMap(null);
+if (flechasRutaConductor) flechasRutaConductor.setMap(null);
+					// 🔥 Cerrar el chat y detener Firebase
+firebase.database().ref("chats/" + chatId)?.off();
+document.getElementById("chat-bubble")?.remove();
+document.getElementById("chat-window")?.remove();
+				
+    const data = new FormData();
+    data.append("action", "cancelar_viaje_pasajero");
+    data.append("id_pasajero", id_pasajero); // Ya lo tienes desde antes
+
+    try {
+        const response = await fetch("/wp-admin/admin-ajax.php", {
+            method: "POST",
+            body: data
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            await mostrarAlertaGlobalAsync("❌ Viaje cancelado correctamente.");
+
+            // Mostrar campos y botón de confirmar
+            origenInput.style.display = "block";
+            destinoInput.style.display = "block";
+			document.getElementById("btn-ubicarme").style.display = "inline-block";  // Mostrar el botón "Ubicarme" después de cancelar el viaje
+            document.getElementById("btn-confirmar-viaje").style.display = "inline-block";
+            document.getElementById("btn-cancelar-viaje").style.display = "none";
+			document.querySelector(".viaje-formulario").classList.remove("solo-cancelar");
+			document.querySelector(".seguimiento-viaje").style.display = "none";
+			document.getElementById("seguimiento-colapsado").style.display = "none";
+if (window.radarInterval) clearInterval(window.radarInterval);
+if (window.radarCircles) {
+  window.radarCircles.forEach(c => c.setMap(null));
+}
+
+            // Restaurar texto original de la tarjeta
+            const tarjeta = document.querySelector(".viaje-card.estado-solicitado");
+            if (tarjeta) {
+                tarjeta.innerHTML = `
+                    <h4><i class="fas fa-map-marker-alt"></i> Solicitud Enviada</h4>
+                    <p>Tu viaje fue solicitado correctamente. Esperando asignación de conductor.</p>
+                `;
+            }
+           
+            // Opcional: también puedes borrar la ruta del mapa
+            directionsRenderer.setDirections({ routes: [] });
+            precioContainer.innerHTML = "";
+			window.location.reload(); // 🔄 Recarga la página completamente
+        } else {
+            mostrarAlertaGlobal("❌ Error al cancelar el viaje: " + result.message);
+        }
+    } catch (err) {
+        mostrarAlertaGlobal("⚠️ Error de red al cancelar el viaje.");
+    } finally {
+        ocultarModalCarga(); // Ocultar loader pase lo que pase ✅
+    }
+});
+            }
+        } else {
+        }
+    })
+    .catch(error => {
+    // Este bloque ahora está completamente vacío, no hace nada si hay un error.
+});
+});
